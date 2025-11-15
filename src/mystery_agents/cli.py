@@ -36,7 +36,13 @@ from mystery_agents.utils.constants import (
     default=False,
     help="Enable debug mode to log model responses (useful for troubleshooting)",
 )
-def generate(output_dir: Path, dry_run: bool, debug: bool) -> None:
+@click.option(
+    "--generate-images",
+    is_flag=True,
+    default=False,
+    help="Generate character portrait images using Gemini API (costs apply - see rate limits)",
+)
+def generate(output_dir: Path, dry_run: bool, debug: bool, generate_images: bool) -> None:
     """
     Generate a mystery party game.
 
@@ -50,6 +56,18 @@ def generate(output_dir: Path, dry_run: bool, debug: bool) -> None:
     click.echo("       MYSTERY PARTY GAME GENERATOR")
     click.echo("=" * 60 + "\n")
 
+    # Warning about image generation costs
+    if generate_images and not dry_run:
+        click.echo("⚠️  IMAGE GENERATION ENABLED")
+        click.echo("   This will generate character portraits using Gemini API")
+        click.echo("   Rate limits: ~10 images/minute, ~70 images/day (Imagen 4 Fast)")
+        click.echo("   Typical game: 6-8 images (~1 minute)")
+        click.echo()
+        if not click.confirm("Do you want to continue?", default=True):
+            click.echo("Image generation disabled. Continuing without images.")
+            generate_images = False
+        click.echo()
+
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -57,6 +75,7 @@ def generate(output_dir: Path, dry_run: bool, debug: bool) -> None:
         meta=MetaInfo(),
         config=GameConfig(
             players=PlayerConfig(total=6),
+            generate_images=generate_images,
             dry_run=dry_run,
             debug_model=debug,
             duration_minutes=90,

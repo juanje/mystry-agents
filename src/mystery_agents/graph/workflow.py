@@ -1,12 +1,13 @@
 """LangGraph workflow for mystery party game generation."""
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import click
 from langgraph.graph import END, START, StateGraph
 
 from mystery_agents.agents.a1_config import ConfigWizardAgent
 from mystery_agents.agents.a2_world import WorldAgent
+from mystery_agents.agents.a3_5_character_images import CharacterImageAgent
 from mystery_agents.agents.a3_characters import CharactersAgent
 from mystery_agents.agents.a4_relationships import RelationshipsAgent
 from mystery_agents.agents.a5_crime import CrimeAgent
@@ -25,7 +26,7 @@ from mystery_agents.utils.constants import DEFAULT_OUTPUT_DIR
 def a1_config_node(state: GameState) -> GameState:
     """A1: Configuration wizard node."""
     agent = AgentFactory.get_agent(ConfigWizardAgent)
-    return agent.run(state)
+    return cast(GameState, agent.run(state))
 
 
 def a2_world_node(state: GameState) -> GameState:
@@ -34,7 +35,7 @@ def a2_world_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(WorldAgent)
     result = agent.run(state)
     click.echo("✓ World generated")
-    return result
+    return cast(GameState, result)
 
 
 def v2_world_validator_node(state: GameState) -> GameState:
@@ -58,7 +59,7 @@ def v2_world_validator_node(state: GameState) -> GameState:
             for issue in result.world_validation.issues:
                 click.echo(f"  Issue: {issue}")
 
-    return result
+    return cast(GameState, result)
 
 
 def a3_characters_node(state: GameState) -> GameState:
@@ -67,7 +68,36 @@ def a3_characters_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(CharactersAgent)
     result = agent.run(state)
     click.echo(f"✓ Generated {len(result.characters)} characters")
-    return result
+    return cast(GameState, result)
+
+
+def a3_5_character_images_node(state: GameState) -> GameState:
+    """A3.5: Character image generation node (optional)."""
+    if not state.config.generate_images:
+        click.echo("⊘ Skipping image generation (not enabled)")
+        return state
+
+    click.echo(f"Generating {len(state.characters)} character images in parallel...")
+
+    try:
+        agent = AgentFactory.get_agent(CharacterImageAgent)
+        result = agent.run(state)
+
+        # Count successfully generated images
+        images_generated = sum(1 for char in result.characters if char.image_path)
+
+        if images_generated > 0:
+            click.echo(f"✓ Generated {images_generated}/{len(result.characters)} character images")
+        else:
+            click.echo(
+                f"⚠️  No images generated (0/{len(result.characters)}). Check logs for details."
+            )
+
+        return cast(GameState, result)
+    except Exception as e:
+        click.echo(f"⚠️  Image generation failed: {e}")
+        click.echo("   Continuing game generation without character images...")
+        return state
 
 
 def a4_relationships_node(state: GameState) -> GameState:
@@ -76,7 +106,7 @@ def a4_relationships_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(RelationshipsAgent)
     result = agent.run(state)
     click.echo(f"✓ Generated {len(result.relationships)} relationships")
-    return result
+    return cast(GameState, result)
 
 
 def a5_crime_node(state: GameState) -> GameState:
@@ -85,7 +115,7 @@ def a5_crime_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(CrimeAgent)
     result = agent.run(state)
     click.echo("✓ Crime generated")
-    return result
+    return cast(GameState, result)
 
 
 def a6_timeline_node(state: GameState) -> GameState:
@@ -94,7 +124,7 @@ def a6_timeline_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(TimelineAgent)
     result = agent.run(state)
     click.echo("✓ Timeline generated")
-    return result
+    return cast(GameState, result)
 
 
 def a7_killer_node(state: GameState) -> GameState:
@@ -103,7 +133,7 @@ def a7_killer_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(KillerSelectionAgent)
     result = agent.run(state)
     click.echo("✓ Killer selected")
-    return result
+    return cast(GameState, result)
 
 
 def v1_validator_node(state: GameState) -> GameState:
@@ -125,7 +155,7 @@ def v1_validator_node(state: GameState) -> GameState:
             for issue in result.validation.issues:
                 click.echo(f"  Issue: {issue.description}")
 
-    return result
+    return cast(GameState, result)
 
 
 def a8_content_node(state: GameState) -> GameState:
@@ -134,7 +164,7 @@ def a8_content_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(ContentGenerationAgent)
     result = agent.run(state)
     click.echo(f"✓ Content generated ({len(result.clues)} clues)")
-    return result
+    return cast(GameState, result)
 
 
 def a9_packaging_node(state: GameState) -> GameState:
@@ -143,7 +173,7 @@ def a9_packaging_node(state: GameState) -> GameState:
     agent = AgentFactory.get_agent(PackagingAgent)
     result = agent.run(state, output_dir=DEFAULT_OUTPUT_DIR)
     click.echo("✓ Package created")
-    return result
+    return cast(GameState, result)
 
 
 # Conditional edge functions for validation loops
@@ -210,6 +240,7 @@ def create_workflow() -> Any:
     graph.add_node("a2_world", a2_world_node)
     graph.add_node("v2_world_validator", v2_world_validator_node)
     graph.add_node("a3_characters", a3_characters_node)
+    graph.add_node("a3_5_character_images", a3_5_character_images_node)
     graph.add_node("a4_relationships", a4_relationships_node)
     graph.add_node("a5_crime", a5_crime_node)
     graph.add_node("a6_timeline", a6_timeline_node)
@@ -234,8 +265,9 @@ def create_workflow() -> Any:
         },
     )
 
-    # Continue main flow
-    graph.add_edge("a3_characters", "a4_relationships")
+    # Continue main flow (with optional image generation)
+    graph.add_edge("a3_characters", "a3_5_character_images")
+    graph.add_edge("a3_5_character_images", "a4_relationships")
     graph.add_edge("a4_relationships", "a5_crime")
     graph.add_edge("a5_crime", "a6_timeline")
     graph.add_edge("a6_timeline", "a7_killer")

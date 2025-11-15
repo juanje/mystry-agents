@@ -17,6 +17,7 @@ Mystery Agents is a multi-agent system that generates complete mystery party gam
 - **Player Packages**: Individual packages with character sheets, invitations, costume suggestions, and Act 1 objectives
 - **Cultural Context**: Adapts character names, customs, and setting details to selected country and region
 - **Dual-Format Output**: Both Markdown and professional PDFs for all materials
+- **Character Image Generation** (Optional): Generate AI-powered character portraits using Gemini Imagen 3 API with parallel processing
 - **Google Gemini Integration**: Uses Google Gemini models (gemini-2.5-pro for generation, gemini-2.5-flash for validation)
 
 ## Installation
@@ -52,9 +53,42 @@ export GOOGLE_API_KEY='your-api-key-here'
 uv run mystery-agents
 
 # With options
-uv run mystery-agents --dry-run  # Use mock data (fast testing)
-uv run mystery-agents --debug    # Enable debug logging
+uv run mystery-agents --dry-run          # Use mock data (fast testing)
+uv run mystery-agents --debug            # Enable debug logging
+uv run mystery-agents --generate-images  # Generate character portrait images (costs apply)
 ```
+
+### Character Image Generation
+
+The `--generate-images` flag enables AI-powered character portrait generation using Google's **Gemini 2.5 Flash Image** model:
+
+**Features:**
+- ✅ Photorealistic character portraits coherent with the game world
+- ✅ Period-appropriate styling (1920s, Victorian, Modern, etc.)
+- ✅ Cultural adaptation based on country and region
+- ✅ Parallel generation (5 concurrent requests with rate limiting)
+- ✅ Automatic embedding in character sheet PDFs
+- ✅ Exponential backoff retry logic for API errors
+
+**Cost & Rate Limits:**
+- Model: `gemini-2.5-flash-image` (cost-effective, fast generation)
+- Rate limit: Subject to Google AI API limits
+- Typical game: 6-8 images (~1-2 minutes with retries)
+- **Note**: Image generation incurs API costs. The system will warn you before proceeding.
+
+**Example:**
+```bash
+# Generate a game with character images
+uv run mystery-agents --generate-images
+
+# The system will:
+# 1. Warn about API costs and rate limits
+# 2. Generate all character images in parallel (~1-2 minutes for 6-8 characters)
+# 3. Embed images in character sheet PDFs
+# 4. Save images to output/game_xxxxx/images/characters/
+```
+
+📚 **For detailed information**, see [`docs/IMAGE_GENERATION.md`](docs/IMAGE_GENERATION.md)
 
 ### Generated Output
 
@@ -77,13 +111,18 @@ The system generates a complete game package in `/output/game_xxxxx/`:
 │   │   ├── invitation.txt       # Invitation with era/setting context
 │   │   ├── invitation.pdf       # PDF version
 │   │   ├── character_sheet.md   # Character details + Act 1 objectives
-│   │   └── character_sheet.pdf  # PDF version
+│   │   └── character_sheet.pdf  # PDF version (with character portrait if generated)
 │   └── ...
 │
-└── /clues/                      # Clean clues (no spoilers)
-    ├── clue_1_xxx.md            # Markdown version
-    ├── clue_1_xxx.pdf           # PDF version (ready to print)
-    └── ...
+├── /clues/                      # Clean clues (no spoilers)
+│   ├── clue_1_xxx.md            # Markdown version
+│   ├── clue_1_xxx.pdf           # PDF version (ready to print)
+│   └── ...
+│
+└── /images/                     # Generated images (if --generate-images enabled)
+    └── /characters/             # Character portrait images
+        ├── char_xxx_name.png    # AI-generated character portraits
+        └── ...
 ```
 
 **Key Features**:

@@ -506,8 +506,22 @@ See you there!
 
         era, location_detail = self._get_game_context(state)
 
-        content = f"""# Character Sheet: {character.name}
+        # Add character image if available
+        image_section = ""
+        if character.image_path and Path(character.image_path).exists():
+            # Use relative path from the character sheet location
+            # Character sheet is at: output/game_xxx/players/player_X_Name/character_sheet.md
+            # Image is at: output/game_xxx/images/characters/char_xxx.png
+            # Relative path: ../../images/characters/char_xxx.png
+            image_filename = Path(character.image_path).name
+            relative_image_path = Path("../../images/characters") / image_filename
+            image_section = f"""
+![{character.name}]({relative_image_path})
 
+"""
+
+        content = f"""# Character Sheet: {character.name}
+{image_section}
 ## Game Context
 - **Era**: {era}
 - **Location**: {location_detail}

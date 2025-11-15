@@ -151,7 +151,7 @@ class ConfigWizardAgent:
             next((d for n, _, d in difficulties if n == difficulty_choice), "medium"),
         )
 
-        # Create config (dry_run and debug_model come from CLI flags)
+        # Create config (dry_run, debug_model, and generate_images come from CLI flags)
         config = GameConfig(
             language=language,
             country=country,
@@ -166,6 +166,7 @@ class ConfigWizardAgent:
             duration_minutes=duration,
             difficulty=difficulty,
             pre_game_delivery=True,
+            generate_images=state.config.generate_images,
             dry_run=state.config.dry_run,
             debug_model=state.config.debug_model,
         )
@@ -185,6 +186,8 @@ class ConfigWizardAgent:
         )
         click.echo(f"  Duration: {config.duration_minutes} minutes")
         click.echo(f"  Difficulty: {config.difficulty}")
+        if config.generate_images:
+            click.echo("  Images: ✨ ENABLED (character portraits will be generated)")
         click.echo()
 
         return state

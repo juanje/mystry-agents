@@ -28,6 +28,7 @@ def markdown_to_pdf(
         extensions=[
             "extra",  # Tables, fenced code, etc.
             "nl2br",  # Newlines become <br>
+            "attr_list",  # Attributes on images
         ],
     )
 
@@ -52,6 +53,14 @@ def markdown_to_pdf(
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 0.3em;
+        }
+        img {
+            display: block;
+            margin: 1em auto;
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         h2 {
             font-size: 16pt;
@@ -117,5 +126,6 @@ def markdown_to_pdf(
     </html>
     """
 
-    # Generate PDF
-    HTML(string=full_html).write_pdf(pdf_path)
+    # Generate PDF (base_url helps resolve relative paths for images)
+    base_url = f"file://{markdown_path.parent.absolute()}/"
+    HTML(string=full_html, base_url=base_url).write_pdf(pdf_path)
