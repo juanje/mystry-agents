@@ -39,10 +39,9 @@ def test_workflow_dry_run(test_output_dir: Path) -> None:
             1,  # epoch (modern)
             1,  # theme (family_mansion)
             # tone is now fixed (no prompt)
-            TEST_MIN_PLAYERS,  # total players (minimum)
+            2,  # male characters
+            2,  # female characters (total = 4 = TEST_MIN_PLAYERS)
             "male",  # host gender
-            0,  # male
-            0,  # female
             TEST_MIN_DURATION,  # duration (minimum)
             1,  # difficulty (easy)
         ]

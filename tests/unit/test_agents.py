@@ -103,10 +103,9 @@ def test_config_wizard_dry_run(basic_state: GameState) -> None:
             1,  # epoch
             1,  # theme
             # tone is now fixed (no prompt)
-            TEST_DEFAULT_PLAYERS,  # total players
+            3,  # male characters
+            3,  # female characters (total = 6 = TEST_DEFAULT_PLAYERS)
             "male",  # host gender
-            0,  # male
-            0,  # female
             TEST_DEFAULT_DURATION,  # duration
             2,  # difficulty
         ]
@@ -116,6 +115,8 @@ def test_config_wizard_dry_run(basic_state: GameState) -> None:
 
         assert result.config.language == "es"
         assert result.config.players.total == TEST_DEFAULT_PLAYERS
+        assert result.config.players.male == 3
+        assert result.config.players.female == 3
         assert result.config.dry_run is True  # Preserved from initial state
 
 

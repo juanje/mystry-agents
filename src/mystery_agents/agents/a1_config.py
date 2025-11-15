@@ -97,12 +97,28 @@ class ConfigWizardAgent:
         # Tone is fixed: elegant mystery with wit (Cluedo meets Knives Out)
         tone: Tone = "mystery_party"
 
-        # Number of players
-        total_players = click.prompt(
-            "\nNumber of players (suspects, not including host)",
-            type=click.IntRange(4, 10),
-            default=6,
-        )
+        # Player gender distribution
+        click.echo("\nNumber of suspect characters (not including host):")
+        click.echo("Specify gender distribution (press Enter for balanced 3/3):")
+        male = click.prompt("Male characters", type=click.IntRange(0, 10), default=3)
+        female = click.prompt("Female characters", type=click.IntRange(0, 10), default=3)
+
+        # Calculate total and validate
+        total_players = male + female
+        if total_players < 4:
+            click.echo(
+                "⚠️  Warning: Minimum 4 players required. Adjusting to 4 players (2 male, 2 female)."
+            )
+            male = 2
+            female = 2
+            total_players = 4
+        elif total_players > 10:
+            click.echo(
+                "⚠️  Warning: Maximum 10 players allowed. Adjusting to 10 players (5 male, 5 female)."
+            )
+            male = 5
+            female = 5
+            total_players = 10
 
         # Host gender
         click.echo("\nHost gender (the victim character):")
@@ -112,19 +128,6 @@ class ConfigWizardAgent:
             default="male",
         )
         host_gender: Literal["male", "female"] = cast(Literal["male", "female"], host_gender_choice)
-
-        # Player gender distribution (optional)
-        click.echo(
-            f"\nOptional: Specify gender distribution for {total_players} players (press Enter to skip)"
-        )
-        male = click.prompt("Male characters", type=int, default=0, show_default=False)
-        female = click.prompt("Female characters", type=int, default=0, show_default=False)
-
-        # Validate gender distribution
-        if male + female > total_players:
-            click.echo("Warning: Gender distribution exceeds total players. Using total only.")
-            male = 0
-            female = 0
 
         # Duration
         duration = click.prompt(
@@ -177,7 +180,9 @@ class ConfigWizardAgent:
             click.echo(f"  Region: {config.region}")
         click.echo(f"  Setting: {config.epoch} / {config.theme}")
         click.echo(f"  Host gender: {config.host_gender}")
-        click.echo(f"  Players: {config.players.total}")
+        click.echo(
+            f"  Players: {config.players.total} ({config.players.male} male, {config.players.female} female)"
+        )
         click.echo(f"  Duration: {config.duration_minutes} minutes")
         click.echo(f"  Difficulty: {config.difficulty}")
         click.echo()
