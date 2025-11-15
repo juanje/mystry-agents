@@ -102,7 +102,7 @@ def test_config_wizard_dry_run(basic_state: GameState) -> None:
             "",  # region (optional, empty string)
             1,  # epoch
             1,  # theme
-            1,  # tone
+            # tone is now fixed (no prompt)
             TEST_DEFAULT_PLAYERS,  # total players
             "male",  # host gender
             0,  # male

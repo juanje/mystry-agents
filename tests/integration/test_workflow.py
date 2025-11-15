@@ -38,7 +38,7 @@ def test_workflow_dry_run(test_output_dir: Path) -> None:
             "",  # region (optional)
             1,  # epoch (modern)
             1,  # theme (family_mansion)
-            1,  # tone (cluedo_like)
+            # tone is now fixed (no prompt)
             TEST_MIN_PLAYERS,  # total players (minimum)
             "male",  # host gender
             0,  # male

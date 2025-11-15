@@ -163,4 +163,5 @@ def test_killer_selection_validates_killer_id(state_with_timeline: GameState) ->
 
     # Killer must be one of the characters
     killer_ids = [c.id for c in state_with_timeline.characters]
+    assert result.killer_selection is not None
     assert result.killer_selection.killer_id in killer_ids

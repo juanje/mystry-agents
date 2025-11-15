@@ -94,19 +94,8 @@ class ConfigWizardAgent:
         if theme == "custom":
             custom_theme_description = click.prompt("Describe your custom theme")
 
-        # Tone
-        tones: list[tuple[int, str, Tone]] = [
-            (1, "cluedo_like - Classic mystery (Agatha Christie style)", "cluedo_like"),
-            (2, "knives_out_like - Modern witty mystery", "knives_out_like"),
-            (3, "serious - Dark and serious", "serious"),
-            (4, "comedy - Humorous mystery", "comedy"),
-            (5, "mixed - Mix of tones", "mixed"),
-        ]
-        click.echo("\nAvailable tones:")
-        for num, desc, _ in tones:
-            click.echo(f"  {num}. {desc}")
-        tone_choice = click.prompt("Choose tone", type=int, default=1)
-        tone = cast(Tone, next((t for n, _, t in tones if n == tone_choice), "cluedo_like"))
+        # Tone is fixed: elegant mystery with wit (Cluedo meets Knives Out)
+        tone: Tone = "mystery_party"
 
         # Number of players
         total_players = click.prompt(
@@ -128,8 +117,8 @@ class ConfigWizardAgent:
         click.echo(
             f"\nOptional: Specify gender distribution for {total_players} players (press Enter to skip)"
         )
-        male = click.prompt("Male characters", type=int, default=0)
-        female = click.prompt("Female characters", type=int, default=0)
+        male = click.prompt("Male characters", type=int, default=0, show_default=False)
+        female = click.prompt("Female characters", type=int, default=0, show_default=False)
 
         # Validate gender distribution
         if male + female > total_players:
@@ -187,7 +176,6 @@ class ConfigWizardAgent:
         if config.region:
             click.echo(f"  Region: {config.region}")
         click.echo(f"  Setting: {config.epoch} / {config.theme}")
-        click.echo(f"  Tone: {config.tone}")
         click.echo(f"  Host gender: {config.host_gender}")
         click.echo(f"  Players: {config.players.total}")
         click.echo(f"  Duration: {config.duration_minutes} minutes")

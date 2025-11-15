@@ -36,7 +36,8 @@ CRITICAL RULES:
 7. All arrays must be valid JSON arrays (use [] if empty)
 8. Follow the exact field names and types specified above
 
-Use the epoch, theme, tone, country, and player count from the config to create an authentic, detailed world.
+Use the epoch, theme, country, and player count from the config to create an authentic, detailed world.
+The tone should be an elegant mystery with wit, balancing classic mystery elements (à la Agatha Christie) with modern cleverness (à la Knives Out).
 """
 
 # V2: World Validator
@@ -451,7 +452,7 @@ You MUST return a JSON object with exactly three fields:
    - is_red_herring: boolean
 
 CRITICAL RULES:
-1. Write ALL content in ENGLISH. The tone should match ({tone})
+1. Write ALL content in ENGLISH. The tone should be elegant and witty - a classic mystery with modern cleverness (think Cluedo meets Knives Out)
 2. All string fields must be non-empty
 3. Arrays can be empty [] if not applicable
 4. Character IDs in clues must match existing character IDs

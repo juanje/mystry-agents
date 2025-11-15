@@ -79,17 +79,15 @@ def state_with_crime(state_with_world: GameState) -> GameState:
             secrets=["Gambling debts", "Secret affair"],
         ),
         murder_method=MurderMethod(
+            type="poison",
             description="Poison in wine",
             weapon_used="Arsenic",
-            concealment_strategy="Made to look like heart attack",
         ),
         time_of_death_approx="Around midnight",
         crime_scene=CrimeScene(
             room_id="library-001",
             description="Dark library with overturned furniture",
         ),
-        discovery_conditions="Found by the butler",
-        motives=[],
     )
     return state_with_world
 
