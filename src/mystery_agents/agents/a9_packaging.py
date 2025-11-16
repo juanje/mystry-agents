@@ -228,6 +228,52 @@ class PackagingAgent(BaseAgent):
             )
             packaging.host_package.append(packaging.audio_script_file)
 
+        # 2.5. Victim character sheet (markdown + PDF task)
+        if state.crime and state.crime.victim:
+            victim_sheet_md_path = host_dir / "victim_character_sheet.md"
+            self._write_victim_sheet(state, victim_sheet_md_path)
+            packaging.host_package.append(
+                FileDescriptor(
+                    type="markdown",
+                    name="victim_character_sheet.md",
+                    path=str(victim_sheet_md_path),
+                )
+            )
+
+            if not state.config.dry_run:
+                victim_sheet_pdf_path = host_dir / "victim_character_sheet.pdf"
+                pdf_tasks.append((victim_sheet_md_path, victim_sheet_pdf_path))
+                packaging.host_package.append(
+                    FileDescriptor(
+                        type="pdf",
+                        name="victim_character_sheet.pdf",
+                        path=str(victim_sheet_pdf_path),
+                    )
+                )
+
+        # 2.6. Detective character sheet (markdown + PDF task)
+        if state.host_guide and state.host_guide.host_act2_detective_role:
+            detective_sheet_md_path = host_dir / "detective_character_sheet.md"
+            self._write_detective_sheet(state, detective_sheet_md_path)
+            packaging.host_package.append(
+                FileDescriptor(
+                    type="markdown",
+                    name="detective_character_sheet.md",
+                    path=str(detective_sheet_md_path),
+                )
+            )
+
+            if not state.config.dry_run:
+                detective_sheet_pdf_path = host_dir / "detective_character_sheet.pdf"
+                pdf_tasks.append((detective_sheet_md_path, detective_sheet_pdf_path))
+                packaging.host_package.append(
+                    FileDescriptor(
+                        type="pdf",
+                        name="detective_character_sheet.pdf",
+                        path=str(detective_sheet_pdf_path),
+                    )
+                )
+
         # 3. Solution (markdown only)
         solution_path = host_dir / SOLUTION_FILENAME
         self._write_solution(state, solution_path)
@@ -656,6 +702,157 @@ See you there!
 ## Your Relationship to the Victim
 {character.relation_to_victim}
 {relationships_section}
+"""
+
+        # Translate the entire file content if needed
+        if state.config.language != "en" and not state.config.dry_run:
+            content = translate_file_content(content, state.config.language)
+
+        path.write_text(content, encoding="utf-8")
+
+    def _write_victim_sheet(self, state: GameState, path: Path) -> None:
+        """Write a character sheet for the victim (host's Act 1 role)."""
+        if not state.crime or not state.crime.victim:
+            return
+
+        victim = state.crime.victim
+        era, location_detail = self._get_game_context(state)
+        gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
+
+        # Add victim image if available
+        image_section = ""
+        if victim.image_path and Path(victim.image_path).exists():
+            # Use relative path from the host directory
+            # Victim sheet is at: output/game_xxx/host/victim_character_sheet.md
+            # Image is at: output/game_xxx/images/characters/victim_xxx.png
+            # Relative path: ../images/characters/victim_xxx.png
+            image_filename = Path(victim.image_path).name
+            relative_image_path = Path("../images/characters") / image_filename
+            image_section = f"""
+![{victim.name}]({relative_image_path})
+
+"""
+
+        # Generate content in English first
+        personality_traits_section = ""
+        if victim.personality_traits:
+            personality_traits_section = chr(10).join(
+                f"- {trait}" for trait in victim.personality_traits
+            )
+        else:
+            personality_traits_section = "- No personality traits defined."
+
+        content = f"""# Character Sheet: {victim.name} (Victim - Your Act 1 Role)
+{image_section}
+## Game Context
+- **Era**: {era}
+- **Location**: {location_detail}
+- **Occasion**: {gathering_reason}
+
+## Basic Information
+- **Age**: {victim.age}
+- **Gender**: {victim.gender}
+- **Role**: {victim.role_in_setting}
+
+## Public Persona
+{victim.public_persona}
+
+## Personality Traits
+{personality_traits_section}
+
+## Your Secrets (as the victim)
+{chr(10).join(f"- {secret}" for secret in victim.secrets) if victim.secrets else "- No secrets defined."}
+
+## Costume Suggestion
+{victim.costume_suggestion or "No specific costume suggestion provided."}
+
+## Your Role in Act 1
+You will play this character during Act 1 of the mystery party. This character will be murdered at the end of Act 1, and you will then transition to playing the detective in Act 2.
+
+**Important**:
+- Embody this character's personality and secrets
+- Create tension and intrigue with the suspects
+- Follow the host guide for timing the murder event
+"""
+
+        # Translate the entire file content if needed
+        if state.config.language != "en" and not state.config.dry_run:
+            content = translate_file_content(content, state.config.language)
+
+        path.write_text(content, encoding="utf-8")
+
+    def _write_detective_sheet(self, state: GameState, path: Path) -> None:
+        """Write a character sheet for the detective (host's Act 2 role)."""
+        if not state.host_guide or not state.host_guide.host_act2_detective_role:
+            return
+
+        detective = state.host_guide.host_act2_detective_role
+        era, location_detail = self._get_game_context(state)
+
+        # Add detective image if available
+        image_section = ""
+        if detective.image_path and Path(detective.image_path).exists():
+            # Use relative path from the host directory
+            # Detective sheet is at: output/game_xxx/host/detective_character_sheet.md
+            # Image is at: output/game_xxx/images/characters/detective_xxx.png
+            # Relative path: ../images/characters/detective_xxx.png
+            image_filename = Path(detective.image_path).name
+            relative_image_path = Path("../images/characters") / image_filename
+            image_section = f"""
+![{detective.character_name}]({relative_image_path})
+
+"""
+
+        # Generate content in English first
+        personality_traits_section = ""
+        if detective.personality_traits:
+            personality_traits_section = chr(10).join(
+                f"- {trait}" for trait in detective.personality_traits
+            )
+        else:
+            personality_traits_section = "- No personality traits defined."
+
+        content = f"""# Character Sheet: {detective.character_name} (Detective - Your Act 2 Role)
+{image_section}
+## Game Context
+- **Era**: {era}
+- **Location**: {location_detail}
+
+## Role
+Detective investigating the murder
+
+## Public Description
+{detective.public_description}
+
+## Personality Traits
+{personality_traits_section}
+
+## Costume Suggestion
+{detective.costume_suggestion or "No specific costume suggestion provided."}
+
+## Your Role in Act 2
+
+You will play this detective character during Act 2 of the mystery party, after the victim is murdered.
+
+**Your objectives**:
+- Interview the suspects
+- Reveal clues strategically
+- Guide the investigation
+- Help players solve the mystery
+
+## Guiding Questions
+
+Use these questions to help players investigate:
+
+{chr(10).join(f"- {question}" for question in detective.guiding_questions) if detective.guiding_questions else "- No guiding questions provided."}
+
+## Final Solution
+
+When players are ready for the solution (or time runs out):
+
+{detective.final_solution_script}
+
+**Note**: See the host guide for complete clue reference and detailed investigation strategy.
 """
 
         # Translate the entire file content if needed

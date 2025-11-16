@@ -13,6 +13,7 @@ from mystery_agents.agents.a4_relationships import RelationshipsAgent
 from mystery_agents.agents.a5_crime import CrimeAgent
 from mystery_agents.agents.a6_timeline import TimelineAgent
 from mystery_agents.agents.a7_killer_selection import KillerSelectionAgent
+from mystery_agents.agents.a8_5_host_images import HostImageAgent
 from mystery_agents.agents.a8_content import ContentGenerationAgent
 from mystery_agents.agents.a9_packaging import PackagingAgent
 from mystery_agents.agents.v1_world_validator import WorldValidatorAgent
@@ -167,6 +168,26 @@ def a8_content_node(state: GameState) -> GameState:
     return cast(GameState, result)
 
 
+def a8_5_host_images_node(state: GameState) -> GameState:
+    """A8.5: Host character image generation node (victim + detective)."""
+    if not state.config.generate_images:
+        click.echo("⊘ Image generation disabled, skipping host images")
+        return state
+
+    click.echo("Generating host character images (victim + detective)...")
+    agent = AgentFactory.get_agent(HostImageAgent)
+
+    try:
+        result = agent.run(state)
+        click.echo("✓ Host images generated")
+        return cast(GameState, result)
+    except Exception as e:
+        click.echo(f"⚠️  Host image generation failed: {e}", err=True)
+        click.echo("Continuing without host images...", err=True)
+        # Continue without failing - images are nice-to-have
+        return state
+
+
 def a9_packaging_node(state: GameState) -> GameState:
     """A9: Packaging node."""
     click.echo("Packaging final deliverables...")
@@ -247,6 +268,7 @@ def create_workflow() -> Any:
     graph.add_node("a7_killer", a7_killer_node)
     graph.add_node("v2_game_logic_validator", v2_game_logic_validator_node)
     graph.add_node("a8_content", a8_content_node)
+    graph.add_node("a8_5_host_images", a8_5_host_images_node)
     graph.add_node("a9_packaging", a9_packaging_node)
 
     # Add linear edges for main flow
@@ -284,7 +306,8 @@ def create_workflow() -> Any:
         },
     )
 
-    graph.add_edge("a8_content", "a9_packaging")
+    graph.add_edge("a8_content", "a8_5_host_images")
+    graph.add_edge("a8_5_host_images", "a9_packaging")
     graph.add_edge("a9_packaging", END)
 
     return graph.compile()

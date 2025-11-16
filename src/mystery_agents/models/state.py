@@ -110,9 +110,21 @@ class VictimSpec(BaseModel):
     public_persona: str = Field(
         description="How the victim appears to others - their public image and personality (e.g., 'Wealthy, controlling, with many secrets', 'Charming but manipulative')."
     )
+    personality_traits: list[str] = Field(
+        default_factory=list,
+        description="List of personality traits (e.g., ['authoritative', 'secretive', 'charismatic']).",
+    )
     secrets: list[str] = Field(
         default_factory=list,
         description="List of the victim's secrets that will be revealed during the investigation (e.g., ['Changed will recently', 'Had affairs', 'Financial troubles']).",
+    )
+    costume_suggestion: str | None = Field(
+        default=None,
+        description="Suggestion for the host's costume when playing the victim in Act 1 (e.g., 'Elegant 1920s suit with pocket watch', 'Victorian dress with jewelry').",
+    )
+    image_path: str | None = Field(
+        default=None,
+        description="Path to the generated character portrait image for the victim.",
     )
 
 
@@ -418,9 +430,21 @@ class DetectiveRole(BaseModel):
 
     character_name: str = "Detective"
     public_description: str
+    personality_traits: list[str] = Field(
+        default_factory=list,
+        description="List of personality traits (e.g., ['analytical', 'observant', 'methodical']).",
+    )
     clues_to_reveal: list[ClueSolutionEntry]
     guiding_questions: list[str] = []
     final_solution_script: str
+    costume_suggestion: str | None = Field(
+        default=None,
+        description="Suggestion for the host's costume when playing the detective in Act 2 (e.g., 'Classic detective coat and hat', 'Modern investigator look').",
+    )
+    image_path: str | None = Field(
+        default=None,
+        description="Path to the generated character portrait image for the detective.",
+    )
 
 
 class HostGuide(BaseModel):

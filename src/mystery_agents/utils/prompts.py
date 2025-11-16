@@ -173,7 +173,9 @@ You MUST return a JSON object with exactly one field:
      * gender: "male" | "female" (MUST match host gender)
      * role_in_setting: string (victim's role, e.g., "Mansion owner")
      * public_persona: string (how victim appears to others)
+     * personality_traits: array of strings (e.g., ["authoritative", "secretive", "charismatic"]) - MANDATORY
      * secrets: array of strings (victim's secrets)
+     * costume_suggestion: string or null (costume idea for host when playing victim)
    - murder_method: MurderMethod object containing:
      * type: "stabbing" | "poison" | "shooting" | "blunt_force" | "other"
      * description: string (how murder was committed)
@@ -435,9 +437,11 @@ You MUST return a JSON object with exactly three fields:
    - host_act2_detective_role: DetectiveRole object with:
      * character_name: string
      * public_description: string
+     * personality_traits: array of strings (e.g., ["analytical", "observant", "methodical"]) - MANDATORY
      * clues_to_reveal: array of ClueSolutionEntry objects
      * guiding_questions: array of strings
      * final_solution_script: string
+     * costume_suggestion: string or null (costume idea for host when playing detective)
 
 2. "audio_script" - AudioScript object with:
    - title: string
