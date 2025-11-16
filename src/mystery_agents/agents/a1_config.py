@@ -98,10 +98,15 @@ class ConfigWizardAgent:
         tone: Tone = "mystery_party"
 
         # Player gender distribution
-        click.echo("\nNumber of suspect characters (not including host):")
-        click.echo("Specify gender distribution (press Enter for balanced 3/3):")
-        male = click.prompt("Male characters", type=click.IntRange(0, 10), default=3)
-        female = click.prompt("Female characters", type=click.IntRange(0, 10), default=3)
+        click.echo("\n" + "=" * 60)
+        click.echo("PLAYER CHARACTERS (suspects)")
+        click.echo("=" * 60)
+        click.echo("ℹ️  These are the PLAYERS (suspects) at your party.")
+        click.echo("   The HOST (victim) is SEPARATE and will be added automatically.")
+        click.echo("   Example: 6 players + 1 host = 7 total people at the party")
+        click.echo("\nSpecify gender distribution for PLAYERS (press Enter for balanced 3/3):")
+        male = click.prompt("  Male player characters", type=click.IntRange(0, 10), default=3)
+        female = click.prompt("  Female player characters", type=click.IntRange(0, 10), default=3)
 
         # Calculate total and validate
         total_players = male + female
@@ -121,9 +126,12 @@ class ConfigWizardAgent:
             total_players = 10
 
         # Host gender
-        click.echo("\nHost gender (the victim character):")
+        click.echo("\n" + "=" * 60)
+        click.echo("HOST CHARACTER (victim)")
+        click.echo("=" * 60)
+        click.echo("ℹ️  The HOST plays the victim in Act 1, then becomes detective in Act 2.")
         host_gender_choice = click.prompt(
-            "Host gender",
+            "  Host gender",
             type=click.Choice(["male", "female"], case_sensitive=False),
             default="male",
         )
@@ -174,19 +182,25 @@ class ConfigWizardAgent:
         # Update state
         state.config = config
 
-        click.echo("\n✓ Configuration complete!\n")
+        click.echo("\n" + "=" * 60)
+        click.echo("✓ CONFIGURATION COMPLETE")
+        click.echo("=" * 60 + "\n")
         click.echo(f"  Language: {config.language}")
         click.echo(f"  Country: {config.country}")
         if config.region:
             click.echo(f"  Region: {config.region}")
         click.echo(f"  Setting: {config.epoch} / {config.theme}")
-        click.echo(f"  Host gender: {config.host_gender}")
-        click.echo(
-            f"  Players: {config.players.total} ({config.players.male} male, {config.players.female} female)"
-        )
         click.echo(f"  Duration: {config.duration_minutes} minutes")
         click.echo(f"  Difficulty: {config.difficulty}")
+        click.echo()
+        click.echo("  PARTY SIZE:")
+        click.echo(
+            f"    • {config.players.total} PLAYERS (suspects): {config.players.male} male, {config.players.female} female"
+        )
+        click.echo(f"    • 1 HOST (victim): {config.host_gender}")
+        click.echo(f"    • TOTAL: {config.players.total + 1} people at the party")
         if config.generate_images:
+            click.echo()
             click.echo("  Images: ✨ ENABLED (character portraits will be generated)")
         click.echo()
 
