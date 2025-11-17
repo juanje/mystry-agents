@@ -13,6 +13,12 @@ from mystery_agents.models.state import (
     PlayerConfig,
     Theme,
 )
+from mystery_agents.utils.constants import (
+    DEFAULT_COUNTRY_EN,
+    DEFAULT_COUNTRY_ES,
+    LANG_CODE_ENGLISH,
+    LANG_CODE_SPANISH,
+)
 
 
 class ConfigWizardAgent:
@@ -149,12 +155,14 @@ class ConfigWizardAgent:
         # Language
         language = click.prompt(
             "Language / Idioma",
-            type=click.Choice(["es", "en"], case_sensitive=False),
-            default="es",
+            type=click.Choice([LANG_CODE_SPANISH, LANG_CODE_ENGLISH], case_sensitive=False),
+            default=LANG_CODE_SPANISH,
         )
 
         # Country (for name generation)
-        country_default = "Spain" if language == "es" else "United States"
+        country_default = (
+            DEFAULT_COUNTRY_ES if language == LANG_CODE_SPANISH else DEFAULT_COUNTRY_EN
+        )
         country = click.prompt(
             "Country / País (for character names)",
             default=country_default,

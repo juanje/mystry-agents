@@ -12,6 +12,8 @@ from mystery_agents.models.state import (
     GameState,
 )
 from mystery_agents.utils.cache import LLMCache
+from mystery_agents.utils.constants import LANG_CODE_ENGLISH
+from mystery_agents.utils.i18n import get_language_name
 
 
 class BatchTranslationOutput(BaseModel):
@@ -34,7 +36,7 @@ def translate_content(state: GameState) -> GameState:
         Updated game state with translated content
     """
     # If target language is English, no translation needed
-    if state.config.language == "en":
+    if state.config.language == LANG_CODE_ENGLISH:
         return state
 
     # If dry run, skip translation
@@ -43,7 +45,7 @@ def translate_content(state: GameState) -> GameState:
 
     # Get LLM for translation
     llm = LLMCache.get_model("tier3")
-    target_lang = "Spanish" if state.config.language == "es" else "English"
+    target_lang = get_language_name(state.config.language)
 
     print(f"  Translating content to {target_lang} (batch mode)...")
 
@@ -459,10 +461,10 @@ def translate_file_content(content: str, target_language: str, max_retries: int 
     Returns:
         Translated file content, or original if translation fails
     """
-    if target_language == "en":
+    if target_language == LANG_CODE_ENGLISH:
         return content
 
-    target_lang_name = "Spanish" if target_language == "es" else "English"
+    target_lang_name = get_language_name(target_language)
 
     # Get LLM for translation
     llm = LLMCache.get_model("tier3")

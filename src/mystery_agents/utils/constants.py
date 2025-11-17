@@ -39,6 +39,14 @@ MAX_TIMELINE_EVENTS_DISPLAY = 50
 # Clue generation
 MIN_CLUES_PER_GAME = 5
 
+# Language configuration
+LANG_CODE_ENGLISH = "en"
+LANG_CODE_SPANISH = "es"
+LANG_NAME_ENGLISH = "English"
+LANG_NAME_SPANISH = "Spanish"
+DEFAULT_COUNTRY_ES = "Spain"
+DEFAULT_COUNTRY_EN = "United States"
+
 # Game tone (fixed - not user configurable)
 GAME_TONE_DESCRIPTION = (
     "an elegant mystery with wit, balancing classic mystery elements "

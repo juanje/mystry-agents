@@ -20,6 +20,7 @@ from mystery_agents.utils.constants import (
     HOST_DIR,
     HOST_GUIDE_FILENAME,
     JPG_EXT,
+    LANG_CODE_ENGLISH,
     MARKDOWN_EXT,
     PDF_EXT,
     PLAYERS_DIR,
@@ -28,6 +29,7 @@ from mystery_agents.utils.constants import (
     TEXT_EXT,
     ZIP_FILE_PREFIX,
 )
+from mystery_agents.utils.i18n import get_clue_labels
 from mystery_agents.utils.prompts import A9_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import safe_get_world_location_name
 from mystery_agents.utils.translation import translate_file_content
@@ -422,7 +424,7 @@ The detective character sheet includes:
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -455,7 +457,7 @@ The detective character sheet includes:
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -552,7 +554,7 @@ See you there!
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -659,7 +661,7 @@ See you there!
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -730,7 +732,7 @@ You will play this character during Act 1 of the mystery party. This character w
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -810,7 +812,7 @@ When players are ready for the solution (or time runs out):
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -829,7 +831,7 @@ When players are ready for the solution (or time runs out):
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
@@ -881,50 +883,18 @@ Players will receive clean versions of the clues without the metadata.
 """
 
         # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
+        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
             content = translate_file_content(content, state.config.language)
 
             # Post-translation: ensure consistent metadata labels
-            labels = self._get_clue_labels(state.config.language)
+            labels = get_clue_labels(state.config.language)
             content = content.replace("**Type**:", f"**{labels['type']}**:")
-            content = content.replace(
-                "**Metadata**", "**Metadatos**" if state.config.language == "es" else "**Metadata**"
-            )
+            content = content.replace("**Metadata**:", f"**{labels['metadata']}**:")
             content = content.replace("**Incriminates**:", f"**{labels['incriminates']}**:")
             content = content.replace("**Exonerates**:", f"**{labels['exonerates']}**:")
             content = content.replace("**Red Herring**:", f"**{labels['red_herring']}**:")
 
         path.write_text(content, encoding="utf-8")
-
-    def _get_clue_labels(self, language: str) -> dict[str, str]:
-        """Get translated labels for clue metadata."""
-        labels = {
-            "en": {
-                "clue": "Clue",
-                "type": "Type",
-                "description": "Description",
-                "related_info": "Related Information",
-                "incriminates": "Incriminates",
-                "exonerates": "Exonerates",
-                "red_herring": "Red Herring",
-                "none": "None",
-                "yes": "Yes",
-                "no": "No",
-            },
-            "es": {
-                "clue": "Pista",
-                "type": "Tipo",
-                "description": "Descripción",
-                "related_info": "Información Relacionada",
-                "incriminates": "Incrimina",
-                "exonerates": "Exonera",
-                "red_herring": "Pista Falsa",
-                "none": "Ninguno",
-                "yes": "Sí",
-                "no": "No",
-            },
-        }
-        return labels.get(language, labels["en"])
 
     def _organize_final_package(
         self, game_dir: Path, keep_work_dir: bool, game_id: str, output_dir: str

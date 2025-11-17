@@ -8,6 +8,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from mystery_agents.utils.constants import DEFAULT_COUNTRY_ES, LANG_CODE_SPANISH
+
 # --- Tipos básicos ---
 DifficultyLevel = Literal["easy", "medium", "hard"]
 Epoch = Literal["modern", "1920s", "victorian", "custom"]
@@ -35,7 +37,7 @@ class GameConfig(BaseModel):
     """Game configuration and preferences."""
 
     language: Literal["es", "en"] = "es"
-    country: str = "Spain"
+    country: str = DEFAULT_COUNTRY_ES
     region: str | None = None
     epoch: Epoch = "modern"
     custom_epoch_description: str | None = None
