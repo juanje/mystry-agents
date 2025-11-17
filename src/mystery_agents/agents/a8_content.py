@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from mystery_agents.models.state import AudioScript, ClueSpec, GameState, HostGuide
+from mystery_agents.models.state import ClueSpec, GameState, HostGuide
 from mystery_agents.utils.cache import LLMCache
 from mystery_agents.utils.constants import (
     MIN_CLUES_PER_GAME,
@@ -36,7 +36,6 @@ class A8Output(BaseModel):
     host_guide: HostGuide = Field(
         description="Complete host guide with setup instructions, victim role, detective role, and solution."
     )
-    audio_script: AudioScript = Field(description="Audio script for Act 1 introduction narration.")
     clues: list[ClueSpec] = Field(
         description="List of clues for Act 2 investigation. Should include at least one clue per character."
     )
@@ -143,7 +142,6 @@ Return the response in the exact JSON format specified in the system prompt.
 
         # Update state
         state.host_guide = result.host_guide
-        state.audio_script = result.audio_script
         state.clues = result.clues
 
         return state
@@ -189,13 +187,6 @@ Return the response in the exact JSON format specified in the system prompt.
                 ],
                 final_solution_script="The killer is... [reveal based on evidence]",
             ),
-        )
-
-        # Mock audio script
-        state.audio_script = AudioScript(
-            title="Act 1 Introduction",
-            approximate_duration_sec=60,
-            intro_narration=f"The year is 1925. You have all been invited to {MOCK_WORLD_NAME} for a weekend gathering...",
         )
 
         # Mock clues

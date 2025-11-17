@@ -209,7 +209,6 @@ def test_content_generation(state_with_crime: GameState) -> None:
     result = agent.run(state_with_killer)
 
     assert result.host_guide is not None
-    assert result.audio_script is not None
     assert len(result.clues) > 0
 
 
@@ -238,7 +237,6 @@ def test_packaging(state_with_crime: GameState, tmp_path: Path) -> None:
     # Using _ prefix for intentionally unused mocks (they prevent real I/O)
     with (
         patch.object(agent, "_write_host_guide") as mock_write_host,
-        patch.object(agent, "_write_audio_script") as mock_write_audio,
         patch.object(agent, "_write_solution") as _mock_write_solution,
         patch.object(agent, "_write_character_sheet") as _mock_write_char,
         patch.object(agent, "_write_invitation") as _mock_write_inv,
@@ -264,5 +262,3 @@ def test_packaging(state_with_crime: GameState, tmp_path: Path) -> None:
         # Verify mocks were called (but no actual I/O happened)
         if state_with_content.host_guide:
             mock_write_host.assert_called_once()
-        if state_with_content.audio_script:
-            mock_write_audio.assert_called_once()

@@ -67,7 +67,6 @@ def test_cli_handles_dict_state_correctly(test_output_dir: Path) -> None:
     ):
         # Pre-populate state with minimal data to avoid agent execution
         from mystery_agents.models.state import (
-            AudioScript,
             ClueSpec,
             CrimeScene,
             CrimeSpec,
@@ -126,9 +125,6 @@ def test_cli_handles_dict_state_correctly(test_output_dir: Path) -> None:
             live_action_murder_event_guide="Test",
             act_2_intro_script="Test",
             host_act2_detective_role=None,
-        )
-        initial_state.audio_script = AudioScript(
-            title="Test", approximate_duration_sec=60, intro_narration="Test"
         )
         initial_state.clues = [
             ClueSpec(
@@ -312,7 +308,6 @@ def test_cli_accesses_nested_objects_correctly() -> None:
 
     # Pre-populate state with minimal required data
     from mystery_agents.models.state import (
-        AudioScript,
         ClueSpec,
         FileDescriptor,
         GlobalTimeline,
@@ -334,9 +329,6 @@ def test_cli_accesses_nested_objects_correctly() -> None:
         live_action_murder_event_guide="Test",
         act_2_intro_script="Test",
         host_act2_detective_role=None,
-    )
-    initial_state.audio_script = AudioScript(
-        title="Test", approximate_duration_sec=60, intro_narration="Test"
     )
     initial_state.clues = [
         ClueSpec(

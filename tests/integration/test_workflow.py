@@ -108,7 +108,6 @@ def test_workflow_dry_run(test_output_dir: Path) -> None:
             final_state["validation"].is_consistent is True
         )  # Nested object uses attribute access
         assert final_state["host_guide"] is not None
-        assert final_state["audio_script"] is not None
         assert len(final_state["clues"]) > 0
         assert final_state["packaging"] is not None
 

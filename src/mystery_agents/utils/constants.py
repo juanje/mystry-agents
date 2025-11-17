@@ -7,7 +7,6 @@ CLUES_DIR = "clues"
 
 # File names
 HOST_GUIDE_FILENAME = "host_guide.md"
-AUDIO_SCRIPT_FILENAME = "audio_script.txt"
 SOLUTION_FILENAME = "solution.md"
 INVITATION_FILENAME = "invitation.txt"
 CHARACTER_SHEET_FILENAME = "character_sheet.md"

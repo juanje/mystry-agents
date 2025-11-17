@@ -4,15 +4,13 @@ import os
 import sys
 import time
 import zipfile
-from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures import TimeoutError as FutureTimeoutError
+from concurrent.futures import ProcessPoolExecutor, TimeoutError as FutureTimeoutError
 from pathlib import Path
 from typing import Any
 
 from mystery_agents.models.state import FileDescriptor, GameState, PackagingInfo
 from mystery_agents.utils.cache import LLMCache
 from mystery_agents.utils.constants import (
-    AUDIO_SCRIPT_FILENAME,
     CHARACTER_SHEET_FILENAME,
     CLUE_FILE_PREFIX,
     CLUES_DIR,
@@ -120,7 +118,7 @@ class PackagingAgent(BaseAgent):
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             # Submit all tasks and get futures
             futures = [executor.submit(_generate_pdf_worker, task) for task in pdf_tasks]
-
+            
             print(f"      Submitted {len(futures)} tasks, waiting for completion...")
             sys.stdout.flush()
 
@@ -132,21 +130,21 @@ class PackagingAgent(BaseAgent):
                     # Use timeout to avoid hanging indefinitely
                     success, error_msg = future.result(timeout=30)
                     completed += 1
-
+                    
                     # Show progress every 4 PDFs
                     if completed % 4 == 0 or completed == len(futures):
                         print(f"      Progress: {completed}/{len(futures)} PDFs")
                         sys.stdout.flush()
-
+                    
                     if not success:
                         errors.append(error_msg)
-
+                        
                 except FutureTimeoutError:
                     error_msg = f"Timeout after 30s: {pdf_tasks[i][0].name}"
                     print(f"      ✗ {error_msg}")
                     sys.stdout.flush()
                     errors.append(error_msg)
-
+                    
                 except Exception as e:
                     error_msg = f"{type(e).__name__}: {e}"
                     print(f"      ✗ {error_msg}")
@@ -184,7 +182,7 @@ class PackagingAgent(BaseAgent):
         game_dir = Path(output_dir) / f"{GAME_DIR_PREFIX}{game_id}"
         game_dir.mkdir(parents=True, exist_ok=True)
 
-        print("  Writing markdown files...")
+        print(f"  Writing markdown files...")
         sys.stdout.flush()
 
         packaging = PackagingInfo(
@@ -219,16 +217,7 @@ class PackagingAgent(BaseAgent):
                     FileDescriptor(type="pdf", name="host_guide.pdf", path=str(host_guide_pdf_path))
                 )
 
-        # 2. Audio script (markdown only)
-        if state.audio_script:
-            audio_script_path = host_dir / AUDIO_SCRIPT_FILENAME
-            self._write_audio_script(state, audio_script_path)
-            packaging.audio_script_file = FileDescriptor(
-                type="audio_script", name=AUDIO_SCRIPT_FILENAME, path=str(audio_script_path)
-            )
-            packaging.host_package.append(packaging.audio_script_file)
-
-        # 2.5. Victim character sheet (markdown + PDF task)
+        # 2. Victim character sheet (markdown + PDF task)
         if state.crime and state.crime.victim:
             victim_sheet_md_path = host_dir / "victim_character_sheet.md"
             self._write_victim_sheet(state, victim_sheet_md_path)
@@ -274,13 +263,20 @@ class PackagingAgent(BaseAgent):
                     )
                 )
 
-        # 3. Solution (markdown only)
+        # 3. Solution (markdown + PDF task)
         solution_path = host_dir / SOLUTION_FILENAME
         self._write_solution(state, solution_path)
         solution_file = FileDescriptor(
             type="markdown", name=SOLUTION_FILENAME, path=str(solution_path)
         )
         packaging.host_package.append(solution_file)
+
+        if not state.config.dry_run:
+            solution_pdf_path = host_dir / "solution.pdf"
+            pdf_tasks.append((solution_path, solution_pdf_path))
+            packaging.host_package.append(
+                FileDescriptor(type="pdf", name="solution.pdf", path=str(solution_pdf_path))
+            )
 
         # 4. Player packages (markdown + PDF tasks)
         for idx, character in enumerate(state.characters, 1):
@@ -321,12 +317,19 @@ class PackagingAgent(BaseAgent):
                 clue_pdf_path = clues_dir / f"{CLUE_FILE_PREFIX}{idx}_{clue.id}.pdf"
                 pdf_tasks.append((clue_md_path, clue_pdf_path))
 
-        # 6. Clue reference for host
+        # 6. Clue reference for host (markdown + PDF task)
         clue_ref_path = host_dir / "clue_reference.md"
         self._write_clue_reference(state, clue_ref_path)
         packaging.host_package.append(
             FileDescriptor(type="markdown", name="clue_reference.md", path=str(clue_ref_path))
         )
+
+        if not state.config.dry_run:
+            clue_ref_pdf_path = host_dir / "clue_reference.pdf"
+            pdf_tasks.append((clue_ref_path, clue_ref_pdf_path))
+            packaging.host_package.append(
+                FileDescriptor(type="pdf", name="clue_reference.pdf", path=str(clue_ref_pdf_path))
+            )
 
         print(f"  ✓ Wrote {len(state.characters) + len(state.clues) + 4} markdown files")
         sys.stdout.flush()
@@ -340,7 +343,7 @@ class PackagingAgent(BaseAgent):
         self._write_readme(state, readme_path, game_id)
 
         # 9. Create ZIP archive (requires all PDFs to be ready)
-        print("  Creating ZIP archive...")
+        print(f"  Creating ZIP archive...")
         sys.stdout.flush()
         zip_path = Path(output_dir) / f"{ZIP_FILE_PREFIX}{game_id}.zip"
         self._create_zip(game_dir, zip_path)
@@ -453,26 +456,6 @@ ZIP file: {zip_path}
             return "No guiding questions."
         return "\n".join(f"- {question}" for question in detective_role.guiding_questions)
 
-    def _write_audio_script(self, state: GameState, path: Path) -> None:
-        """Write the audio script to a file with full translation."""
-        if not state.audio_script:
-            return
-
-        # Generate content in English first
-        content = f"""# Audio Script: {state.audio_script.title}
-
-Duration: ~{state.audio_script.approximate_duration_sec} seconds
-
-## Narration
-
-{state.audio_script.intro_narration}
-"""
-
-        # Translate the entire file content if needed
-        if state.config.language != "en" and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
-
-        path.write_text(content, encoding="utf-8")
 
     def _write_solution(self, state: GameState, path: Path) -> None:
         """Write the complete solution to a file with full translation."""
@@ -999,7 +982,6 @@ STRUCTURE
   ├── host_guide.md          (Markdown version)
   ├── host_guide.pdf         (PDF version - ready to print)
   ├── solution.md            (Complete solution)
-  ├── audio_script.md        (Audio narration script)
   └── clue_reference.md      (All clues with metadata - SPOILERS!)
 
 /players/       - Individual packages for each player (ready to share)

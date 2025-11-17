@@ -443,12 +443,7 @@ You MUST return a JSON object with exactly three fields:
      * final_solution_script: string
      * costume_suggestion: string or null (costume idea for host when playing detective)
 
-2. "audio_script" - AudioScript object with:
-   - title: string
-   - approximate_duration_sec: integer
-   - intro_narration: string (SSML-formatted narration - see SSML guidelines below)
-
-3. "clues" - Array of ClueSpec objects, each with:
+2. "clues" - Array of ClueSpec objects, each with:
    - id: string (auto-generated, format "clue-xxxxx")
    - type: "note" | "object" | "forensic_report" | "map_snippet" | "photo" | "other"
    - title: string
@@ -464,39 +459,6 @@ CRITICAL RULES:
 4. Character IDs in clues must match existing character IDs
 5. Include at least one clue per character
 6. Follow the exact field names and types specified above
-
-SSML GUIDELINES FOR intro_narration:
-The intro_narration field must use SSML (Speech Synthesis Markup Language) to create an atmospheric audio experience.
-Wrap the entire narration in <speak></speak> tags and use these elements:
-
-- **Pauses**: <break time="1s"/> or <break time="500ms"/> for dramatic timing
-- **Emphasis**: <emphasis level="strong">important words</emphasis> or <emphasis level="moderate">subtle emphasis</emphasis>
-- **Speed**: <prosody rate="slow">dramatic text</prosody> or <prosody rate="fast">urgent text</prosody>
-- **Pitch**: <prosody pitch="-2st">deeper voice</prosody> or <prosody pitch="+1st">higher voice</prosody>
-- **Volume**: <prosody volume="soft">whispered text</prosody> or <prosody volume="loud">emphasized text</prosody>
-- **Combined**: <prosody rate="slow" pitch="-1st" volume="soft">eerie atmosphere</prosody>
-
-SSML EXAMPLE:
-<speak>
-  <break time="2s"/>
-  <prosody rate="slow" pitch="-1st">
-    Welcome to Blackwood Manor, where shadows dance in candlelight
-  </prosody>
-  <break time="1.5s"/>
-  Tonight, the prestigious <emphasis level="strong">Ashford family</emphasis> gathers for what should be a celebration.
-  <break time="1s"/>
-  But beneath the veneer of civility,
-  <prosody rate="slow" volume="soft">
-    dark secrets simmer, waiting to erupt.
-  </prosody>
-  <break time="2s"/>
-  <prosody pitch="-2st">
-    By midnight, one of them will be dead.
-  </prosody>
-  <break time="2s"/>
-</speak>
-
-IMPORTANT: Use SSML to convey atmosphere, tension, and pacing. DO NOT use stage directions like "(sound of wind)" - use pauses, pitch, and speed changes instead.
 
 Make everything atmospheric, engaging, and playable."""
 

@@ -81,12 +81,6 @@ def translate_content(state: GameState) -> GameState:
                     entry.how_to_interpret
                 )
 
-    # Collect audio script texts
-    if state.audio_script:
-        script = state.audio_script
-        texts_to_translate["audio_script.title"] = script.title
-        texts_to_translate["audio_script.intro_narration"] = script.intro_narration
-
     # Collect clue texts (batch all clues together)
     if state.clues:
         for idx, clue in enumerate(state.clues):
@@ -167,14 +161,6 @@ def translate_content(state: GameState) -> GameState:
                 key = f"detective_role.clue_{idx}.how_to_interpret"
                 if key in all_translations:
                     entry.how_to_interpret = all_translations[key]
-
-    # Apply audio script translations
-    if state.audio_script:
-        script = state.audio_script
-        if "audio_script.title" in all_translations:
-            script.title = all_translations["audio_script.title"]
-        if "audio_script.intro_narration" in all_translations:
-            script.intro_narration = all_translations["audio_script.intro_narration"]
 
     # Apply clue translations
     if state.clues:

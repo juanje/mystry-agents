@@ -460,14 +460,6 @@ class HostGuide(BaseModel):
     solution_timeline: GlobalTimeline | None = None
 
 
-class AudioScript(BaseModel):
-    """Audio script for narration."""
-
-    title: str
-    approximate_duration_sec: int
-    intro_narration: str
-
-
 # --- Visuales y empaquetado ---
 class ImagePromptSpec(BaseModel):
     """Image generation prompt specification."""
@@ -492,7 +484,7 @@ class FileDescriptor(BaseModel):
     """File descriptor for packaging."""
 
     id: str = Field(default_factory=lambda: f"file-{uuid4().hex[:8]}")
-    type: Literal["pdf", "markdown", "txt", "audio_script", "image_prompt"]
+    type: Literal["pdf", "markdown", "txt", "image_prompt"]
     name: str
     path: str | None = None
 
@@ -502,7 +494,6 @@ class PackagingInfo(BaseModel):
 
     host_package: list[FileDescriptor] = []
     host_guide_file: FileDescriptor | None = None
-    audio_script_file: FileDescriptor | None = None
     individual_player_packages: list[FileDescriptor] = []
     index_summary: str = ""
 
@@ -592,8 +583,6 @@ class GameState(BaseModel):
     maps: list[MapSpec] = []
 
     host_guide: HostGuide | None = None
-    audio_script: AudioScript | None = None
-
     visual_style: VisualStyle | None = None
 
     validation: ValidationReport | None = None
