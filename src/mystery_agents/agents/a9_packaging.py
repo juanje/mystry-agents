@@ -20,7 +20,6 @@ from mystery_agents.utils.constants import (
     HOST_DIR,
     HOST_GUIDE_FILENAME,
     JPG_EXT,
-    LANG_CODE_ENGLISH,
     MARKDOWN_EXT,
     PDF_EXT,
     PLAYERS_DIR,
@@ -29,10 +28,9 @@ from mystery_agents.utils.constants import (
     TEXT_EXT,
     ZIP_FILE_PREFIX,
 )
-from mystery_agents.utils.i18n import get_clue_labels
+from mystery_agents.utils.i18n import get_clue_labels, get_document_labels
 from mystery_agents.utils.prompts import A9_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import safe_get_world_location_name
-from mystery_agents.utils.translation import translate_file_content
 
 from .base import BaseAgent
 
@@ -358,107 +356,104 @@ ZIP file: {zip_path}
         if not state.host_guide:
             return
 
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         hg = state.host_guide
         era, location_detail = self._get_game_context(state)
         gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
 
-        content = f"""# Mystery Party Host Guide
+        content = f"""# {labels["host_guide_title"]}
 
-## Game Information
-- **Game ID**: {state.meta.id[:GAME_ID_LENGTH]}
-- **Created**: {state.meta.created_at}
-- **Players**: {len(state.characters)}
-- **Duration**: {state.config.duration_minutes} minutes
-- **Language**: {state.config.language}
-- **Era**: {era}
-- **Location**: {location_detail}
-- **Gathering Reason**: {gathering_reason}
+## {labels["game_information"]}
+- **{labels["game_id"]}**: {state.meta.id[:GAME_ID_LENGTH]}
+- **{labels["created"]}**: {state.meta.created_at}
+- **{labels["players"]}**: {len(state.characters)}
+- **{labels["duration"]}**: {state.config.duration_minutes} {labels["minutes"]}
+- **{labels["language"]}**: {state.config.language}
+- **{labels["era"]}**: {era}
+- **{labels["location"]}**: {location_detail}
+- **{labels["gathering_reason"]}**: {gathering_reason}
 
-## Introduction (Read to Guests)
+## {labels["introduction"]}
 
 {hg.spoiler_free_intro}
 
-## Setup Instructions
+## {labels["setup_instructions"]}
 
 {chr(10).join(f"- {instruction}" for instruction in hg.setup_instructions)}
 
-## Your Role in Act 1: The Victim
+## {labels["your_role_act1"]}
 
-**📄 See your dedicated Victim Character Sheet (victim_character_sheet.pdf) for complete details.**
+**{labels["see_victim_sheet"]}**
 
-The victim character sheet includes:
-- Full character background and personality traits
-- Public persona and secrets
-- Costume suggestions
-- Character portrait (if images enabled)
+{labels["victim_sheet_includes"]}
+- {labels["full_background"]}
+- {labels["public_persona"]}
+- {labels["costume_suggestions"]}
+- {labels["character_portrait"]}
 
-Quick summary: {hg.host_act1_role_description or "No victim role description provided."}
+{labels["quick_summary"]} {hg.host_act1_role_description or labels["no_description"]}
 
-## Runtime Tips
+## {labels["runtime_tips"]}
 
 {chr(10).join(f"- {tip}" for tip in hg.runtime_tips)}
 
-## The Murder Event (Transition to Act 2)
+## {labels["murder_event"]}
 
-{hg.live_action_murder_event_guide or "No murder event guide provided."}
+{hg.live_action_murder_event_guide or labels["no_murder_guide"]}
 
-## Act 2: You Are Now the Detective
+## {labels["act2_detective"]}
 
-### Introduction Script (Read to Players)
+### {labels["intro_script"]}
 
-{hg.act_2_intro_script or "No Act 2 intro script provided."}
+{hg.act_2_intro_script or labels["no_act2_intro"]}
 
-### Your Detective Role
+### {labels["detective_role"]}
 
-**📄 See your dedicated Detective Character Sheet (detective_character_sheet.pdf) for complete details.**
+**{labels["see_detective_sheet"]}**
 
-The detective character sheet includes:
-- Full character description and personality traits
-- Complete list of clues to reveal with interpretations
-- Guiding questions to ask players
-- Final solution script for the big reveal
-- Costume suggestions
-- Character portrait (if images enabled)
+{labels["detective_sheet_includes"]}
+- {labels["character_description"]}
+- {labels["clues_list"]}
+- {labels["guiding_questions"]}
+- {labels["solution_script"]}
+- {labels["costume_suggestions"]}
+- {labels["character_portrait"]}
 
-**Quick Tip**: Keep the detective character sheet handy during Act 2 for quick reference!
+**{labels["quick_tip"]}**: {labels["keep_sheet_handy"]}
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
 
     def _write_solution(self, state: GameState, path: Path) -> None:
-        """Write the complete solution to a file with full translation."""
+        """Write the complete solution to a file."""
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         killer = None
         if state.killer_selection:
             killer_id = state.killer_selection.killer_id
             killer = next((c for c in state.characters if c.id == killer_id), None)
 
-        # Generate content in English first
-        content = f"""# Complete Solution
+        content = f"""# {labels["solution_title"]}
 
-## The Killer
+## {labels["the_killer"]}
 
-**{killer.name if killer else "Unknown"}** (ID: {state.killer_selection.killer_id if state.killer_selection else "N/A"})
+**{killer.name if killer else labels["unknown"]}** (ID: {state.killer_selection.killer_id if state.killer_selection else "N/A"})
 
-## Rationale
+## {labels["rationale"]}
 
-{state.killer_selection.rationale if state.killer_selection else "No rationale provided."}
+{state.killer_selection.rationale if state.killer_selection else labels["no_rationale"]}
 
-## Truth Narrative
+## {labels["truth_narrative"]}
 
-{state.killer_selection.truth_narrative if state.killer_selection else "No truth narrative provided."}
+{state.killer_selection.truth_narrative if state.killer_selection else labels["no_truth_narrative"]}
 
-## Timeline of Events
+## {labels["timeline_events"]}
 
-{self._format_timeline(state.timeline_global) if state.timeline_global else "No timeline provided."}
+{self._format_timeline(state.timeline_global) if state.timeline_global else labels["no_timeline"]}
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
 
@@ -528,39 +523,39 @@ The detective character sheet includes:
         return names
 
     def _write_invitation(self, state: GameState, character: Any, path: Path) -> None:
-        """Write an invitation for a character with full translation."""
+        """Write an invitation for a character."""
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         era, location_detail = self._get_game_context(state)
         gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
 
-        content = f"""You are invited to a mystery party!
+        content = f"""{labels["you_are_invited"]}
 
-**Era**: {era}
-**Setting**: {location_detail}
-**Occasion**: {gathering_reason}
+**{labels["era"]}**: {era}
+**{labels["location"]}**: {location_detail}
+**{labels["gathering_reason"]}**: {gathering_reason}
 
-You will be playing: {character.name}
+{labels["role"]}: {character.name}
 
 {character.public_description}
 
-Please arrive in character. See your character sheet for full details.
+{labels["costume"]}: {character.costume_suggestion or labels["no_costume"]}
 
-Costume suggestion: {character.costume_suggestion or "No specific costume required"}
+{labels["event_details"]}:
+- {labels["location"]}: {safe_get_world_location_name(state)}
+- {labels["date_time"]}: {labels["tbd_host"]}
 
-Event Details:
-- Location: {safe_get_world_location_name(state)}
-- Date & Time: [To be determined by host]
-
-See you there!
+{labels["see_you_there"]}
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
 
     def _write_character_sheet(self, state: GameState, character: Any, path: Path) -> None:
-        """Write a character sheet with full translation."""
+        """Write a character sheet."""
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         # Get relationships for this character
         relationships_section = ""
         if state.relationships:
@@ -587,28 +582,17 @@ See you there!
 
             if character_relationships:
                 relationships_section = f"""
-## Your Relationships with Other Characters
+## {labels["relationships"]}
 {chr(10).join(f"- {rel}" for rel in character_relationships)}
 """
-            else:
-                relationships_section = """
-## Your Relationships with Other Characters
-- You know the other characters, but no specific relationships have been defined.
-"""
-        else:
-            relationships_section = """
-## Your Relationships with Other Characters
-- You know the other characters, but no specific relationships have been defined.
-"""
 
-        # Generate content in English first
         personality_traits_section = ""
         if character.personality_traits:
             personality_traits_section = chr(10).join(
                 f"- {trait}" for trait in character.personality_traits
             )
         else:
-            personality_traits_section = "- No personality traits defined."
+            personality_traits_section = f"- {labels['no_objectives']}"
 
         era, location_detail = self._get_game_context(state)
         gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
@@ -616,11 +600,6 @@ See you there!
         # Add character image if available
         image_section = ""
         if character.image_path and Path(character.image_path).exists():
-            # Use relative path from the character sheet location
-            # New flat structure:
-            # Character sheet is at: output/game_xxx/characters/Name_character_sheet.md
-            # Image is at: output/game_xxx/images/characters/char_xxx.png
-            # Relative path: ../images/characters/char_xxx.png
             image_filename = Path(character.image_path).name
             relative_image_path = Path("../images/characters") / image_filename
             image_section = f"""
@@ -628,41 +607,48 @@ See you there!
 
 """
 
-        content = f"""# Character Sheet: {character.name}
+        content = f"""# {labels["character_sheet_title"]}: {character.name}
 {image_section}
-## Game Context
-- **Era**: {era}
-- **Location**: {location_detail}
-- **Occasion**: {gathering_reason}
+## {labels["era"]}: {era}
+**{labels["location"]}**: {location_detail}
+**{labels["gathering_reason"]}**: {gathering_reason}
 
-## Basic Information
-- **Age Range**: {character.age_range}
-- **Gender**: {character.gender}
-- **Role**: {character.role}
+## {labels["role"]}: {character.role}
 
-## Public Description
+## {labels["public_description"]}
 {character.public_description}
 
-## Personality Traits
+## {labels["personality_traits"]}
 {personality_traits_section}
 
-## Your Secrets
-{chr(10).join(f"- {secret}" for secret in character.personal_secrets) if character.personal_secrets else "- No secrets defined."}
+## {labels["personal_secrets"]}
+{chr(10).join(f"- {secret}" for secret in character.personal_secrets) if character.personal_secrets else f"- {labels['no_objectives']}"}
 
-## Your Goals
-{chr(10).join(f"- {goal}" for goal in character.personal_goals) if character.personal_goals else "- No goals defined."}
+## {labels["personal_goals"]}
+{chr(10).join(f"- {goal}" for goal in character.personal_goals) if character.personal_goals else f"- {labels['no_objectives']}"}
 
-## Your Act 1 Objectives
-{chr(10).join(f"- {obj}" for obj in character.act1_objectives) if character.act1_objectives else "- No objectives defined."}
+## {labels["motive"]}
+{character.motive_for_crime if character.motive_for_crime else labels["no_motive"]}
 
-## Your Relationship to the Victim
+## {labels["costume"]}
+{character.costume_suggestion or labels["no_costume"]}
+
+## {labels["act1_objectives"]}
+{chr(10).join(f"- {obj}" for obj in character.act1_objectives) if character.act1_objectives else f"- {labels['no_objectives']}"}
+
+## {labels["relation_to_victim"]}
 {character.relation_to_victim}
 {relationships_section}
+
+{labels["remember_secrets"]}
 """
 
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
+        # If no image, note that in the content
+        if not character.image_path or not Path(character.image_path).exists():
+            content = content.replace(
+                f"# {labels['character_sheet_title']}:",
+                f"# {labels['character_sheet_title']}:\n\n*{labels['no_image']}*\n\n#",
+            )
 
         path.write_text(content, encoding="utf-8")
 
@@ -671,6 +657,9 @@ See you there!
         if not state.crime or not state.crime.victim:
             return
 
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         victim = state.crime.victim
         era, location_detail = self._get_game_context(state)
         gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
@@ -678,10 +667,6 @@ See you there!
         # Add victim image if available
         image_section = ""
         if victim.image_path and Path(victim.image_path).exists():
-            # Use relative path from the host directory
-            # Victim sheet is at: output/game_xxx/host/victim_character_sheet.md
-            # Image is at: output/game_xxx/images/characters/victim_xxx.png
-            # Relative path: ../images/characters/victim_xxx.png
             image_filename = Path(victim.image_path).name
             relative_image_path = Path("../images/characters") / image_filename
             image_section = f"""
@@ -689,51 +674,44 @@ See you there!
 
 """
 
-        # Generate content in English first
         personality_traits_section = ""
         if victim.personality_traits:
             personality_traits_section = chr(10).join(
                 f"- {trait}" for trait in victim.personality_traits
             )
         else:
-            personality_traits_section = "- No personality traits defined."
+            personality_traits_section = f"- {labels['no_objectives']}"
 
-        content = f"""# Character Sheet: {victim.name} (Victim - Your Act 1 Role)
+        content = f"""# {labels["victim_sheet_title"]}: {victim.name}
 {image_section}
-## Game Context
-- **Era**: {era}
-- **Location**: {location_detail}
-- **Occasion**: {gathering_reason}
+**{labels["era"]}**: {era}
+**{labels["location"]}**: {location_detail}
+**{labels["gathering_reason"]}**: {gathering_reason}
 
-## Basic Information
-- **Age**: {victim.age}
-- **Gender**: {victim.gender}
-- **Role**: {victim.role_in_setting}
+## {labels["role"]}: {victim.role_in_setting}
 
-## Public Persona
+## {labels["public_description"]}
 {victim.public_persona}
 
-## Personality Traits
+## {labels["personality_traits"]}
 {personality_traits_section}
 
-## Your Secrets (as the victim)
-{chr(10).join(f"- {secret}" for secret in victim.secrets) if victim.secrets else "- No secrets defined."}
+## {labels["personal_secrets"]}
+{chr(10).join(f"- {secret}" for secret in victim.secrets) if victim.secrets else f"- {labels['no_objectives']}"}
 
-## Costume Suggestion
-{victim.costume_suggestion or "No specific costume suggestion provided."}
+## {labels["costume"]}
+{victim.costume_suggestion or labels["no_costume"]}
 
-## Your Role in Act 1
-You will play this character during Act 1 of the mystery party. This character will be murdered at the end of Act 1, and you will then transition to playing the detective in Act 2.
+## {labels["host_act1_role"]}
 
-**Important**:
-- Embody this character's personality and secrets
-- Create tension and intrigue with the suspects
-- Follow the host guide for timing the murder event
+## {labels["important_note"]}
+{labels["died_before_act2"]}
+
+**{labels["important_note"]}**:
+- {labels["embody_character"]}
+- {labels["create_tension"]}
+- {labels["follow_timing"]}
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
 
@@ -742,16 +720,15 @@ You will play this character during Act 1 of the mystery party. This character w
         if not state.host_guide or not state.host_guide.host_act2_detective_role:
             return
 
+        # Get translated labels
+        labels = get_document_labels(state.config.language)
+
         detective = state.host_guide.host_act2_detective_role
         era, location_detail = self._get_game_context(state)
 
         # Add detective image if available
         image_section = ""
         if detective.image_path and Path(detective.image_path).exists():
-            # Use relative path from the host directory
-            # Detective sheet is at: output/game_xxx/host/detective_character_sheet.md
-            # Image is at: output/game_xxx/images/characters/detective_xxx.png
-            # Relative path: ../images/characters/detective_xxx.png
             image_filename = Path(detective.image_path).name
             relative_image_path = Path("../images/characters") / image_filename
             image_section = f"""
@@ -759,61 +736,46 @@ You will play this character during Act 1 of the mystery party. This character w
 
 """
 
-        # Generate content in English first
         personality_traits_section = ""
         if detective.personality_traits:
             personality_traits_section = chr(10).join(
                 f"- {trait}" for trait in detective.personality_traits
             )
         else:
-            personality_traits_section = "- No personality traits defined."
+            personality_traits_section = f"- {labels['no_objectives']}"
 
-        content = f"""# Character Sheet: {detective.character_name} (Detective - Your Act 2 Role)
+        content = f"""# {labels["detective_sheet_title"]}: {detective.character_name}
 {image_section}
-## Game Context
-- **Era**: {era}
-- **Location**: {location_detail}
+**{labels["era"]}**: {era}
+**{labels["location"]}**: {location_detail}
 
-## Role
-Detective investigating the murder
-
-## Public Description
+## {labels["public_description"]}
 {detective.public_description}
 
-## Personality Traits
+## {labels["personality_traits"]}
 {personality_traits_section}
 
-## Costume Suggestion
-{detective.costume_suggestion or "No specific costume suggestion provided."}
+## {labels["costume"]}
+{detective.costume_suggestion or labels["no_costume"]}
 
-## Your Role in Act 2
+## {labels["host_act2_role"]}
 
-You will play this detective character during Act 2 of the mystery party, after the victim is murdered.
+## {labels["guiding_questions"]}
 
-**Your objectives**:
-- Interview the suspects
-- Reveal clues strategically
-- Guide the investigation
-- Help players solve the mystery
+{chr(10).join(f"- {question}" for question in detective.guiding_questions) if detective.guiding_questions else f"- {labels['no_objectives']}"}
 
-## Guiding Questions
+## {labels["clues_to_reveal"]}
 
-Use these questions to help players investigate:
+{chr(10).join(f"**{entry.clue_id}**: {entry.how_to_interpret}" for entry in detective.clues_to_reveal) if detective.clues_to_reveal else f"- {labels['no_objectives']}"}
 
-{chr(10).join(f"- {question}" for question in detective.guiding_questions) if detective.guiding_questions else "- No guiding questions provided."}
+## {labels["final_solution"]}
 
-## Final Solution
-
-When players are ready for the solution (or time runs out):
+{labels["solution_timing"]}
 
 {detective.final_solution_script}
 
-**Note**: See the host guide for complete clue reference and detailed investigation strategy.
+**{labels["see_host_guide"]}**
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
 
         path.write_text(content, encoding="utf-8")
 
@@ -830,10 +792,6 @@ When players are ready for the solution (or time runs out):
 {clue.description}
 """
 
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
-
         path.write_text(content, encoding="utf-8")
 
     def _write_clue_reference(self, state: GameState, path: Path) -> None:
@@ -843,7 +801,10 @@ When players are ready for the solution (or time runs out):
         This includes all clues with their full information about who they
         incriminate/exonerate, for the host's reference during the game.
         """
-        # Generate content in English first
+        # Get translated labels
+        doc_labels = get_document_labels(state.config.language)
+        clue_labels = get_clue_labels(state.config.language)
+
         clue_entries = []
         for idx, clue in enumerate(state.clues, 1):
             # Replace character IDs with names
@@ -855,44 +816,33 @@ When players are ready for the solution (or time runs out):
             )
 
             clue_num = f"{idx:02d}"  # Format as 2-digit number
-            clue_entry = f"""## Clue {clue_num}: {clue.title}
+            clue_entry = f"""## {clue_labels["clue"]} {clue_num}: {clue.title}
 
-**Type**: {clue.type}
-**File**: clue_{clue_num}.pdf
+**{clue_labels["type"]}**: {clue.type}
 
-**Description**:
+**{clue_labels["description"]}**:
 {clue.description}
 
-**Metadata** (for host only):
-- **Incriminates**: {", ".join(incriminates_names) if incriminates_names else "None"}
-- **Exonerates**: {", ".join(exonerates_names) if exonerates_names else "None"}
-- **Red Herring**: {"Yes" if clue.is_red_herring else "No"}
+**{clue_labels["metadata"]}**:
+- **{clue_labels["incriminates"]}**: {", ".join(incriminates_names) if incriminates_names else clue_labels["none"]}
+- **{clue_labels["exonerates"]}**: {", ".join(exonerates_names) if exonerates_names else clue_labels["none"]}
+- **{clue_labels["red_herring"]}**: {clue_labels["yes"] if clue.is_red_herring else clue_labels["no"]}
 """
             clue_entries.append(clue_entry)
 
-        content = f"""# Clue Reference (Host Only)
+        content = f"""# {doc_labels["clue_reference_title"]}
 
-This document contains all clues with their complete metadata.
-**DO NOT share this with players** - it contains spoilers!
+## {doc_labels["clue_overview"]}
+{doc_labels["total_clues"]}: {len(state.clues)}
 
-Players will receive clean versions of the clues without the metadata.
+**{doc_labels["host_only_warning"]}**
+
+{doc_labels["players_get_clean"]}
 
 ---
 
 {"---\n\n".join(clue_entries)}
 """
-
-        # Translate the entire file content if needed
-        if state.config.language != LANG_CODE_ENGLISH and not state.config.dry_run:
-            content = translate_file_content(content, state.config.language)
-
-            # Post-translation: ensure consistent metadata labels
-            labels = get_clue_labels(state.config.language)
-            content = content.replace("**Type**:", f"**{labels['type']}**:")
-            content = content.replace("**Metadata**:", f"**{labels['metadata']}**:")
-            content = content.replace("**Incriminates**:", f"**{labels['incriminates']}**:")
-            content = content.replace("**Exonerates**:", f"**{labels['exonerates']}**:")
-            content = content.replace("**Red Herring**:", f"**{labels['red_herring']}**:")
 
         path.write_text(content, encoding="utf-8")
 

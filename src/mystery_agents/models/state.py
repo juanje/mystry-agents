@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-from mystery_agents.utils.constants import DEFAULT_COUNTRY_ES, LANG_CODE_SPANISH
+from mystery_agents.utils.constants import DEFAULT_COUNTRY_ES
 
 # --- Tipos básicos ---
 DifficultyLevel = Literal["easy", "medium", "hard"]
