@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from mystery_agents.models.state import CharacterSpec, GameState
 from mystery_agents.utils.cache import LLMCache
+from mystery_agents.utils.constants import GAME_TONE_STYLE
 from mystery_agents.utils.prompts import A3_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import (
     safe_get_world_epoch,
@@ -80,7 +81,7 @@ WORLD:
 NOTE: The victim (host's Act 1 character) will be created later. Focus on creating interesting suspects who would naturally be at this location.
 
 CONSTRAINTS:
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}
 - Total suspects: {state.config.players.total}
 {gender_constraints if gender_constraints else "- No specific gender requirements"}
 

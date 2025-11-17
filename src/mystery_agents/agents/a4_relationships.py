@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from mystery_agents.models.state import GameState, RelationshipSpec
 from mystery_agents.utils.cache import LLMCache
+from mystery_agents.utils.constants import GAME_TONE_STYLE
 from mystery_agents.utils.prompts import A4_RELATIONSHIPS_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import (
     safe_get_world_epoch,
@@ -78,7 +79,7 @@ WORLD CONTEXT:
 - Country: {state.config.country}
 - Region: {state.config.region if state.config.region else "N/A"}
 - Theme: {state.config.theme}
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}
 
 CHARACTERS:
 {characters_info}

@@ -16,6 +16,7 @@ from mystery_agents.utils.constants import (
     DEFAULT_OUTPUT_DIR,
     GAME_DIR_PREFIX,
     GAME_ID_LENGTH,
+    GAME_TONE_STYLE,
     HOST_DIR,
     HOST_GUIDE_FILENAME,
     JPG_EXT,
@@ -336,7 +337,7 @@ Game ID: {game_id}
 Players: {len(state.characters)}
 Language: {state.config.language}
 Theme: {state.config.theme}
-Tone: {state.config.tone}
+Tone: {GAME_TONE_STYLE}
 
 Files included:
 - Host guide with complete game instructions

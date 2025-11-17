@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field
 
 # --- Tipos básicos ---
 DifficultyLevel = Literal["easy", "medium", "hard"]
-Tone = Literal["mystery_party"]  # Fixed tone: elegant mystery with wit (Cluedo meets Knives Out)
 Epoch = Literal["modern", "1920s", "victorian", "custom"]
 Theme = Literal["family_mansion", "corporate_retreat", "cruise", "train", "custom"]
 
@@ -42,7 +41,6 @@ class GameConfig(BaseModel):
     custom_epoch_description: str | None = None
     theme: Theme = "family_mansion"
     custom_theme_description: str | None = None
-    tone: Tone = "mystery_party"
     players: PlayerConfig = Field(default_factory=lambda: PlayerConfig(total=6))
     host_gender: Literal["male", "female"] = "male"
     duration_minutes: int = Field(90, ge=60, le=180)

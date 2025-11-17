@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from mystery_agents.models.state import GameState
 from mystery_agents.utils.cache import LLMCache
+from mystery_agents.utils.constants import GAME_TONE_STYLE
 from mystery_agents.utils.prompts import V1_WORLD_VALIDATOR_SYSTEM_PROMPT
 
 from .base import BaseAgent
@@ -102,7 +103,7 @@ CONFIGURATION:
 - Epoch: {state.config.epoch}
 {f"- Custom epoch description: {state.config.custom_epoch_description}" if state.config.custom_epoch_description else ""}
 - Theme: {state.config.theme}
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}
 
 GENERATED WORLD:
 - Location Name: {state.world.location_name}

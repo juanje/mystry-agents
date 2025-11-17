@@ -1,10 +1,12 @@
 """Prompt templates for all agents."""
 
+from mystery_agents.utils.constants import GAME_TONE_SHORT
+
 # A1: Config/Wizard Agent
-A1_SYSTEM_PROMPT = """You are a configuration assistant for a mystery party game generator.
+A1_SYSTEM_PROMPT = f"""You are a configuration assistant for a mystery party game generator.
 Your role is to help normalize and validate user preferences into a GameConfig object.
 
-The game generates murder mystery parties in the style of Cluedo and Knives Out, where:
+The game generates murder mystery parties in the style of {GAME_TONE_SHORT}, where:
 - The HOST will play the victim in Act 1, then become a detective in Act 2
 - PLAYERS (4-10) will be suspects throughout the game
 - The game should last 60-180 minutes
@@ -39,7 +41,7 @@ CRITICAL RULES:
 9. Follow the exact field names and types specified above
 
 Use the epoch, theme, country, and player count from the config to create an authentic, detailed world.
-The tone should be an elegant mystery with wit, balancing classic mystery elements (à la Agatha Christie) with modern cleverness (à la Knives Out).
+The tone should be {GAME_TONE_DESCRIPTION}.
 """
 
 # V1: World Validator
@@ -453,7 +455,7 @@ You MUST return a JSON object with exactly three fields:
    - is_red_herring: boolean
 
 CRITICAL RULES:
-1. Write ALL content in ENGLISH. The tone should be elegant and witty - a classic mystery with modern cleverness (think Cluedo meets Knives Out)
+1. Write ALL content in ENGLISH. The tone should be {GAME_TONE_DESCRIPTION}
 2. All string fields must be non-empty
 3. Arrays can be empty [] if not applicable
 4. Character IDs in clues must match existing character IDs

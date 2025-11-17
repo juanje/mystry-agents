@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from mystery_agents.models.state import GameState, WorldBible
 from mystery_agents.utils.cache import LLMCache
-from mystery_agents.utils.constants import MOCK_WORLD_NAME
+from mystery_agents.utils.constants import GAME_TONE_STYLE, MOCK_WORLD_NAME
 from mystery_agents.utils.prompts import A2_WORLD_SYSTEM_PROMPT
 
 from .base import BaseAgent
@@ -79,7 +79,7 @@ CONFIGURATION:
 {f"- Custom epoch description: {state.config.custom_epoch_description}" if state.config.custom_epoch_description else ""}
 - Theme: {state.config.theme}
 {f"- Custom theme description: {state.config.custom_theme_description}" if state.config.custom_theme_description else ""}
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}
 - Number of suspects: {state.config.players.total}
 - Difficulty: {state.config.difficulty}
 

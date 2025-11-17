@@ -39,6 +39,14 @@ MAX_TIMELINE_EVENTS_DISPLAY = 50
 # Clue generation
 MIN_CLUES_PER_GAME = 5
 
+# Game tone (fixed - not user configurable)
+GAME_TONE_DESCRIPTION = (
+    "an elegant mystery with wit, balancing classic mystery elements "
+    "(à la Agatha Christie) with modern cleverness (à la Knives Out)"
+)
+GAME_TONE_SHORT = "Cluedo meets Knives Out"
+GAME_TONE_STYLE = "mystery_party"  # Internal identifier (legacy)
+
 # LLM model configuration
 LLM_MODEL_TIER1 = "gemini-2.5-pro"
 LLM_MODEL_TIER2 = "gemini-2.5-pro"

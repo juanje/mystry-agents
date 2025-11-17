@@ -12,7 +12,6 @@ from mystery_agents.models.state import (
     GameState,
     PlayerConfig,
     Theme,
-    Tone,
 )
 
 
@@ -76,7 +75,6 @@ class ConfigWizardAgent:
             custom_epoch_description=data.get("custom_epoch_description"),
             theme=data["theme"],
             custom_theme_description=data.get("custom_theme_description"),
-            tone=data.get("tone", "mystery_party"),
             players=players,
             host_gender=data["host_gender"],
             duration_minutes=data.get("duration_minutes", 90),
@@ -207,9 +205,6 @@ class ConfigWizardAgent:
         if theme == "custom":
             custom_theme_description = click.prompt("Describe your custom theme")
 
-        # Tone is fixed: elegant mystery with wit (Cluedo meets Knives Out)
-        tone: Tone = "mystery_party"
-
         # Player gender distribution
         click.echo("\n" + "=" * 60)
         click.echo("PLAYER CHARACTERS (suspects)")
@@ -281,7 +276,6 @@ class ConfigWizardAgent:
             custom_epoch_description=custom_epoch_description,
             theme=theme,
             custom_theme_description=custom_theme_description,
-            tone=tone,
             players=PlayerConfig(total=total_players, male=male, female=female),
             host_gender=host_gender,
             duration_minutes=duration,

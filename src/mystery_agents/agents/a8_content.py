@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from mystery_agents.models.state import ClueSpec, GameState, HostGuide
 from mystery_agents.utils.cache import LLMCache
 from mystery_agents.utils.constants import (
+    GAME_TONE_DESCRIPTION,
+    GAME_TONE_STYLE,
     MIN_CLUES_PER_GAME,
     MOCK_DETECTIVE_NAME,
     MOCK_MURDER_TIME,
@@ -62,7 +64,11 @@ class ContentGenerationAgent(BaseAgent):
         Returns:
             System prompt string with language and tone filled in
         """
-        return A8_SYSTEM_PROMPT.format(language=state.config.language, tone=state.config.tone)
+        return A8_SYSTEM_PROMPT.format(
+            language=state.config.language,
+            tone=GAME_TONE_STYLE,
+            GAME_TONE_DESCRIPTION=GAME_TONE_DESCRIPTION,
+        )
 
     def run(self, state: GameState) -> GameState:
         """
@@ -95,7 +101,7 @@ class ContentGenerationAgent(BaseAgent):
 
 GAME INFO:
 - Target language: {state.config.language} (but generate in ENGLISH - translation will happen later)
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}. {GAME_TONE_DESCRIPTION}
 - Duration: {state.config.duration_minutes} minutes
 - Players: {len(state.characters)}
 
@@ -132,7 +138,7 @@ REQUIREMENTS:
 4. Character IDs in clues must match existing character IDs
 5. All string fields must have values - do not leave any empty
 6. Arrays can be empty [] if not applicable
-7. Write everything in ENGLISH with a {state.config.tone} tone (translation to {state.config.language} will happen later)
+7. Write everything in ENGLISH with a {GAME_TONE_STYLE} tone (translation to {state.config.language} will happen later)
 
 Return the response in the exact JSON format specified in the system prompt.
 """

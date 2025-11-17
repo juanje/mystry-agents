@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from mystery_agents.models.state import CrimeSpec, GameState
 from mystery_agents.utils.cache import LLMCache
-from mystery_agents.utils.constants import MOCK_VICTIM_NAME
+from mystery_agents.utils.constants import GAME_TONE_STYLE, MOCK_VICTIM_NAME
 from mystery_agents.utils.prompts import A5_CRIME_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import (
     safe_get_world_epoch,
@@ -84,7 +84,7 @@ CHARACTERS ({len(state.characters)} suspects):
 CONFIGURATION:
 - Target language: {state.config.language} (but generate in ENGLISH - translation will happen later)
 - Host gender: {state.config.host_gender} (victim MUST be this gender)
-- Tone: {state.config.tone}
+- Tone: {GAME_TONE_STYLE}
 - Difficulty: {state.config.difficulty}
 
 REQUIREMENTS:
