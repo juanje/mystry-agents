@@ -22,7 +22,6 @@ from mystery_agents.utils.constants import (
     SOLUTION_FILENAME,
     ZIP_FILE_PREFIX,
 )
-from mystery_agents.utils.pdf_generator import markdown_to_pdf
 from mystery_agents.utils.prompts import A9_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import safe_get_world_location_name
 from mystery_agents.utils.translation import translate_file_content
@@ -35,6 +34,7 @@ def _generate_pdf_worker(args: tuple[Path, Path]) -> tuple[bool, str]:
     Worker function for parallel PDF generation.
 
     This function must be at module level for ProcessPoolExecutor pickling.
+    Imports markdown_to_pdf lazily to avoid loading weasyprint at module import time.
 
     Args:
         args: Tuple of (markdown_path, pdf_path)
@@ -42,6 +42,8 @@ def _generate_pdf_worker(args: tuple[Path, Path]) -> tuple[bool, str]:
     Returns:
         Tuple of (success, error_message)
     """
+    from mystery_agents.utils.pdf_generator import markdown_to_pdf
+
     md_path, pdf_path = args
     try:
         markdown_to_pdf(md_path, pdf_path)

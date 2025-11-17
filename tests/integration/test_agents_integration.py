@@ -242,7 +242,6 @@ def test_packaging(state_with_crime: GameState, tmp_path: Path) -> None:
         patch.object(agent, "_write_invitation") as _mock_write_inv,
         patch.object(agent, "_write_clue_clean") as _mock_write_clue_clean,
         patch.object(agent, "_write_clue_reference") as _mock_write_clue_ref,
-        patch.object(agent, "_write_readme") as _mock_write_readme,
         patch.object(agent, "_create_zip") as _mock_create_zip,
         patch.object(agent, "_generate_all_pdfs") as _mock_generate_pdfs,
         patch("pathlib.Path.mkdir") as _mock_mkdir,  # Mock directory creation
