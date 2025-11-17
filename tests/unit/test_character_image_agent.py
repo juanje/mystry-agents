@@ -64,7 +64,6 @@ def test_character_image_agent_initialization(mock_google_api_key: None) -> None
 
     assert agent is not None
     assert agent.MAX_CONCURRENT_REQUESTS == 5
-    assert agent.MAX_RETRIES == 3
 
 
 def test_character_image_agent_dry_run(game_state_with_characters: GameState) -> None:
@@ -138,9 +137,12 @@ async def test_generate_character_image_success(
 
     character = state.characters[0]
 
-    # Mock the API call to succeed
-    with patch.object(agent, "_call_gemini_image_api", new_callable=AsyncMock) as mock_api:
-        mock_api.return_value = None  # Simulate successful image generation
+    # Mock the shared utility function to succeed
+    with patch(
+        "mystery_agents.agents.a3_5_character_images.generate_image_with_gemini",
+        new_callable=AsyncMock,
+    ) as mock_api:
+        mock_api.return_value = True  # Simulate successful image generation
 
         await agent._generate_character_image(character, state, tmp_path)
 
@@ -161,26 +163,18 @@ async def test_generate_character_image_retry(
 
     character = state.characters[0]
 
-    # Mock the API call to fail twice, then succeed
-    # Also mock asyncio.sleep to avoid waiting
-    with (
-        patch.object(agent, "_call_gemini_image_api", new_callable=AsyncMock) as mock_api,
-        patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep,
-    ):
-        mock_api.side_effect = [
-            Exception("Rate limit"),
-            Exception("Temporary error"),
-            None,  # Success on third try
-        ]
+    # Mock the utility function to succeed (handles retries internally)
+    with patch(
+        "mystery_agents.agents.a3_5_character_images.generate_image_with_gemini",
+        new_callable=AsyncMock,
+    ) as mock_api:
+        mock_api.return_value = True  # Simulate success after retries
 
         await agent._generate_character_image(character, state, tmp_path)
 
-        # Should have retried 3 times
-        assert mock_api.call_count == 3
-        # Should have slept twice (after first two failures)
-        assert mock_sleep.call_count == 2
-        # Image path should be set after successful retry
+        # Image path should be set after successful generation
         assert character.image_path is not None
+        assert mock_api.called
 
 
 @pytest.mark.asyncio
@@ -195,22 +189,18 @@ async def test_generate_character_image_max_retries_exceeded(
 
     character = state.characters[0]
 
-    # Mock the API call to always fail
-    # Also mock asyncio.sleep to avoid waiting
-    with (
-        patch.object(agent, "_call_gemini_image_api", new_callable=AsyncMock) as mock_api,
-        patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep,
-    ):
-        mock_api.side_effect = Exception("Persistent error")
+    # Mock the utility function to fail (exhausted all retries)
+    with patch(
+        "mystery_agents.agents.a3_5_character_images.generate_image_with_gemini",
+        new_callable=AsyncMock,
+    ) as mock_api:
+        mock_api.return_value = False  # Simulate failure after all retries
 
         await agent._generate_character_image(character, state, tmp_path)
 
-        # Should have tried MAX_RETRIES times
-        assert mock_api.call_count == agent.MAX_RETRIES
-        # Should have slept MAX_RETRIES-1 times (no sleep after last failure)
-        assert mock_sleep.call_count == agent.MAX_RETRIES - 1
         # Image path should be None after all retries failed
         assert character.image_path is None
+        assert mock_api.called
 
 
 @pytest.mark.asyncio
@@ -223,9 +213,12 @@ async def test_generate_all_images_parallel(
     state = game_state_with_characters
     agent = CharacterImageAgent(llm=MagicMock())
 
-    # Mock the API call
-    with patch.object(agent, "_call_gemini_image_api", new_callable=AsyncMock) as mock_api:
-        mock_api.return_value = None
+    # Mock the utility function
+    with patch(
+        "mystery_agents.agents.a3_5_character_images.generate_image_with_gemini",
+        new_callable=AsyncMock,
+    ) as mock_api:
+        mock_api.return_value = True  # Always succeed
 
         await agent._generate_all_images(state, tmp_path)
 

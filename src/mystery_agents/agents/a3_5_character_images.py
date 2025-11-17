@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 from pathlib import Path
 
 from langchain_core.language_models import BaseChatModel
 
 from mystery_agents.agents.base import BaseAgent
 from mystery_agents.models.state import CharacterSpec, GameState
+from mystery_agents.utils.constants import IMAGE_GENERATION_MAX_CONCURRENT
+from mystery_agents.utils.image_generation import (
+    generate_image_with_gemini,
+    get_character_image_output_dir,
+)
 from mystery_agents.utils.state_helpers import (
     safe_get_world_epoch,
     safe_get_world_location_name,
@@ -30,9 +34,7 @@ class CharacterImageAgent(BaseAgent):
     - Mock generation in dry-run mode
     """
 
-    MAX_CONCURRENT_REQUESTS = 5  # Safe limit under Gemini's 10 RPM for Imagen 4 Fast
-    MAX_RETRIES = 3
-    RETRY_DELAY_BASE = 2.0  # Exponential backoff starting delay
+    MAX_CONCURRENT_REQUESTS = IMAGE_GENERATION_MAX_CONCURRENT
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         """
@@ -169,118 +171,19 @@ class CharacterImageAgent(BaseAgent):
         image_filename = f"{character.id}_{character.name.lower().replace(' ', '_')}.png"
         image_path = output_dir / image_filename
 
-        for attempt in range(self.MAX_RETRIES):
-            try:
-                logger.info(
-                    f"[A3.5] 🎨 Generating image for {character.name} "
-                    f"(attempt {attempt + 1}/{self.MAX_RETRIES})"
-                )
+        logger.info(f"[A3.5] 🎨 Generating image for {character.name}")
 
-                # Call Gemini Image API
-                await self._call_gemini_image_api(prompt, image_path)
+        # Generate image with retry logic
+        success = await generate_image_with_gemini(prompt, image_path)
 
-                # Update character with image path (absolute path for robustness)
-                character.image_path = str(image_path.absolute())
-
-                logger.info(f"[A3.5] ✅ Generated: {character.name} -> {image_path.name}")
-                return
-
-            except Exception as e:
-                if attempt < self.MAX_RETRIES - 1:
-                    delay = self.RETRY_DELAY_BASE * (2**attempt)
-                    logger.warning(
-                        f"[A3.5] ⚠️  Error generating image for {character.name}: {e}. "
-                        f"Retrying in {delay}s..."
-                    )
-                    await asyncio.sleep(delay)
-                else:
-                    logger.error(
-                        f"[A3.5] ❌ Failed to generate image for {character.name} "
-                        f"after {self.MAX_RETRIES} attempts: {e}"
-                    )
-                    # Don't fail the entire generation, just skip this image
-                    character.image_path = None
-
-    async def _call_gemini_image_api(self, prompt: str, output_path: Path) -> None:
-        """
-        Call Gemini Image Generation API using Gemini 2.5 Flash Image model.
-
-        Uses LangChain's ChatGoogleGenerativeAI with response_modalities=["IMAGE"]
-        to generate images from text prompts.
-
-        Args:
-            prompt: Image generation prompt
-            output_path: Where to save the generated image
-
-        Raises:
-            Exception: If image generation fails
-        """
-        try:
-            import base64
-            from io import BytesIO
-
-            from langchain_core.messages import HumanMessage
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            from PIL import Image as PILImage
-
-            # Get API key
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                raise ValueError("GOOGLE_API_KEY environment variable not set")
-
-            # Initialize Gemini 2.5 Flash Image model
-            llm = ChatGoogleGenerativeAI(
-                model="models/gemini-2.5-flash-image",
-                temperature=0.6,
-                google_api_key=api_key,
-            )
-
-            # Create message with image generation prompt
-            message = HumanMessage(content=[{"type": "text", "text": prompt}])
-
-            # Generate image with IMAGE response modality
-            # Run in executor to make it async-compatible
-            loop = asyncio.get_event_loop()
-            resp = await loop.run_in_executor(
-                None,
-                lambda: llm.invoke([message], generation_config={"response_modalities": ["IMAGE"]}),
-            )
-
-            # Extract base64 image data from response
-            # resp.content is a list, first element should be a dict with image_url
-            content_item = resp.content[0]
-            if not isinstance(content_item, dict):
-                raise ValueError(
-                    f"Unexpected response format: content[0] is {type(content_item)}, expected dict"
-                )
-
-            image_url_data = content_item.get("image_url")
-            if not image_url_data or not isinstance(image_url_data, dict):
-                raise ValueError(f"No image_url found in response: {content_item}")
-
-            url_str = image_url_data.get("url")
-            if not url_str or not isinstance(url_str, str):
-                raise ValueError(f"No valid URL string in image_url: {image_url_data}")
-
-            # Extract base64 data (format: data:image/png;base64,<data>)
-            img_b64 = url_str.split(",")[-1]
-            img_data = base64.b64decode(img_b64)
-
-            # Open and save image
-            image = PILImage.open(BytesIO(img_data))
-            image.save(str(output_path), "PNG")
-
-            logger.info(f"[A3.5] 📸 Image saved to {output_path.name}")
-
-        except ImportError as e:
-            logger.error(
-                f"[A3.5] ❌ Missing dependencies for image generation: {e}. "
-                "Run: uv sync to install required packages"
-            )
-            raise
-        except Exception as e:
-            logger.error(f"[A3.5] ❌ Image generation failed: {e}")
-            raise
+        if success:
+            # Update character with image path (absolute path for robustness)
+            character.image_path = str(image_path.absolute())
+            logger.info(f"[A3.5] ✅ Generated: {character.name} -> {image_path.name}")
+        else:
+            logger.error(f"[A3.5] ❌ Failed to generate image for {character.name}")
+            # Don't fail the entire generation, just skip this image
+            character.image_path = None
 
     def _build_image_prompt(self, character: CharacterSpec, state: GameState) -> str:
         """
@@ -348,9 +251,7 @@ The image should feel like a character from a high-quality period mystery film."
         """
         # Use game_id from meta
         game_id = state.meta.id[:8] if state.meta else "default"
-        base_dir = Path("output") / f"game_{game_id}"
-
-        return base_dir / "images" / "characters"
+        return get_character_image_output_dir(game_id)
 
     def _mock_output(self, state: GameState) -> GameState:
         """

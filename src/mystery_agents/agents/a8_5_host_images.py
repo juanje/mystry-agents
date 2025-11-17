@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import asyncio
-import os
 from pathlib import Path
 
 from langchain_core.language_models import BaseChatModel
 
 from mystery_agents.agents.base import BaseAgent
 from mystery_agents.models.state import DetectiveRole, GameState, VictimSpec
+from mystery_agents.utils.image_generation import (
+    generate_image_with_gemini,
+    get_character_image_output_dir,
+)
 from mystery_agents.utils.state_helpers import (
     safe_get_world_epoch,
     safe_get_world_location_name,
@@ -26,9 +28,6 @@ class HostImageAgent(BaseAgent):
     - Exponential backoff for rate limit errors
     - Mock generation in dry-run mode
     """
-
-    MAX_RETRIES = 3
-    RETRY_DELAY_BASE = 2.0  # Exponential backoff starting delay
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         """
@@ -83,170 +82,80 @@ class HostImageAgent(BaseAgent):
             return state
 
         # Create output directory for images
-        output_dir = self._get_image_output_dir(state)
+        game_id = state.meta.id[:8] if state.meta else "default"
+        output_dir = get_character_image_output_dir(game_id)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Generate images sequentially (only 2 images, no need for parallelization)
-        asyncio.run(self._generate_host_images(state, output_dir))
+        # Generate victim image
+        if state.crime and state.crime.victim:
+            self._generate_victim_image_sync(state.crime.victim, state, output_dir)
+
+        # Generate detective image
+        if state.host_guide and state.host_guide.host_act2_detective_role:
+            self._generate_detective_image_sync(
+                state.host_guide.host_act2_detective_role, state, output_dir
+            )
 
         # Return updated state
         return state
 
-    async def _generate_host_images(self, state: GameState, output_dir: Path) -> None:
-        """
-        Generate images for victim and detective.
-
-        Args:
-            state: Current game state
-            output_dir: Directory to save images
-        """
-        # Generate victim image
-        if state.crime and state.crime.victim:
-            await self._generate_victim_image(state.crime.victim, state, output_dir)
-
-        # Generate detective image
-        if state.host_guide and state.host_guide.host_act2_detective_role:
-            await self._generate_detective_image(
-                state.host_guide.host_act2_detective_role, state, output_dir
-            )
-
-    async def _generate_victim_image(
+    def _generate_victim_image_sync(
         self, victim: VictimSpec, state: GameState, output_dir: Path
     ) -> None:
         """
-        Generate image for the victim character.
+        Generate image for the victim character (synchronous wrapper).
 
         Args:
             victim: Victim specification
             state: Current game state
             output_dir: Directory to save image
         """
-        prompt = self._build_victim_image_prompt(victim, state)
-        image_filename = f"{victim.id}_{victim.name.lower().replace(' ', '_')}.png"
-        image_path = output_dir / image_filename
+        import asyncio
 
-        for attempt in range(self.MAX_RETRIES):
-            try:
-                # Call Gemini Image API
-                await self._call_gemini_image_api(prompt, image_path)
+        async def generate() -> None:
+            prompt = self._build_victim_image_prompt(victim, state)
+            image_filename = f"{victim.id}_{victim.name.lower().replace(' ', '_')}.png"
+            image_path = output_dir / image_filename
 
-                # Update victim with image path (absolute path for robustness)
+            success = await generate_image_with_gemini(prompt, image_path)
+
+            if success:
                 victim.image_path = str(image_path.absolute())
-                return
+            else:
+                victim.image_path = None
 
-            except Exception:
-                if attempt < self.MAX_RETRIES - 1:
-                    delay = self.RETRY_DELAY_BASE * (2**attempt)
-                    await asyncio.sleep(delay)
-                else:
-                    # Don't fail the entire generation, just skip this image
-                    victim.image_path = None
+        asyncio.run(generate())
 
-    async def _generate_detective_image(
+    def _generate_detective_image_sync(
         self, detective: DetectiveRole, state: GameState, output_dir: Path
     ) -> None:
         """
-        Generate image for the detective character.
+        Generate image for the detective character (synchronous wrapper).
 
         Args:
             detective: Detective role specification
             state: Current game state
             output_dir: Directory to save image
         """
-        prompt = self._build_detective_image_prompt(detective, state)
-        # Use a unique ID for detective
-        detective_id = f"detective-{state.meta.id[:8]}"
-        image_filename = f"{detective_id}_{detective.character_name.lower().replace(' ', '_')}.png"
-        image_path = output_dir / image_filename
+        import asyncio
 
-        for attempt in range(self.MAX_RETRIES):
-            try:
-                # Call Gemini Image API
-                await self._call_gemini_image_api(prompt, image_path)
+        async def generate() -> None:
+            prompt = self._build_detective_image_prompt(detective, state)
+            # Use a unique ID for detective
+            detective_id = f"detective-{state.meta.id[:8]}"
+            image_filename = (
+                f"{detective_id}_{detective.character_name.lower().replace(' ', '_')}.png"
+            )
+            image_path = output_dir / image_filename
 
-                # Update detective with image path (absolute path for robustness)
+            success = await generate_image_with_gemini(prompt, image_path)
+
+            if success:
                 detective.image_path = str(image_path.absolute())
-                return
+            else:
+                detective.image_path = None
 
-            except Exception:
-                if attempt < self.MAX_RETRIES - 1:
-                    delay = self.RETRY_DELAY_BASE * (2**attempt)
-                    await asyncio.sleep(delay)
-                else:
-                    # Don't fail the entire generation, just skip this image
-                    detective.image_path = None
-
-    async def _call_gemini_image_api(self, prompt: str, output_path: Path) -> None:
-        """
-        Call Gemini Image Generation API using Gemini 2.5 Flash Image model.
-
-        Uses LangChain's ChatGoogleGenerativeAI with response_modalities=["IMAGE"]
-        to generate images from text prompts.
-
-        Args:
-            prompt: Image generation prompt
-            output_path: Where to save the generated image
-
-        Raises:
-            Exception: If image generation fails
-        """
-        try:
-            import base64
-            from io import BytesIO
-
-            from langchain_core.messages import HumanMessage
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            from PIL import Image as PILImage
-
-            # Get API key
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                raise ValueError("GOOGLE_API_KEY environment variable not set")
-
-            # Initialize Gemini 2.5 Flash Image model
-            llm = ChatGoogleGenerativeAI(
-                model="models/gemini-2.5-flash-image",
-                temperature=0.6,
-                google_api_key=api_key,
-            )
-
-            # Create message with image generation prompt
-            message = HumanMessage(content=[{"type": "text", "text": prompt}])
-
-            # Generate image with IMAGE response modality
-            # Run in executor to make it async-compatible
-            loop = asyncio.get_event_loop()
-            resp = await loop.run_in_executor(
-                None,
-                lambda: llm.invoke([message], generation_config={"response_modalities": ["IMAGE"]}),
-            )
-
-            # Extract base64 image data from response
-            # resp.content is a list, first element should be a dict with image_url
-            content_item = resp.content[0]
-            if not isinstance(content_item, dict):
-                raise ValueError(
-                    f"Unexpected response format: content[0] is {type(content_item)}, expected dict"
-                )
-
-            image_url_data = content_item.get("image_url")
-            if not image_url_data or not isinstance(image_url_data, dict):
-                raise ValueError(f"No image_url found in response: {content_item}")
-
-            url_str = image_url_data.get("url")
-            if not url_str or not isinstance(url_str, str):
-                raise ValueError(f"No valid URL string in image_url: {image_url_data}")
-
-            # Extract base64 data (format: data:image/png;base64,<data>)
-            img_b64 = url_str.split(",")[-1]
-            img_data = base64.b64decode(img_b64)
-
-            # Open and save image
-            image = PILImage.open(BytesIO(img_data))
-            image.save(str(output_path), "PNG")
-
-        except Exception:
-            raise
+        asyncio.run(generate())
 
     def _build_victim_image_prompt(self, victim: VictimSpec, state: GameState) -> str:
         """
@@ -357,22 +266,6 @@ The image should feel like a classic detective from a high-quality period myster
 
         return prompt
 
-    def _get_image_output_dir(self, state: GameState) -> Path:
-        """
-        Get the output directory for host character images.
-
-        Args:
-            state: Current game state
-
-        Returns:
-            Path to images directory
-        """
-        # Use game_id from meta
-        game_id = state.meta.id[:8] if state.meta else "default"
-        base_dir = Path("output") / f"game_{game_id}"
-
-        return base_dir / "images" / "characters"
-
     def _mock_output(self, state: GameState) -> GameState:
         """
         Generate mock image paths for dry run mode.
@@ -383,7 +276,8 @@ The image should feel like a classic detective from a high-quality period myster
         Returns:
             State with mock image paths
         """
-        output_dir = self._get_image_output_dir(state)
+        game_id = state.meta.id[:8] if state.meta else "default"
+        output_dir = get_character_image_output_dir(game_id)
 
         # Mock victim image
         if state.crime and state.crime.victim:

@@ -38,6 +38,13 @@ MAX_TIMELINE_EVENTS_DISPLAY = 50
 # Clue generation
 MIN_CLUES_PER_GAME = 5
 
+# Image generation configuration
+IMAGE_GENERATION_MODEL = "models/gemini-2.5-flash-image"
+IMAGE_GENERATION_TEMPERATURE = 0.6
+IMAGE_GENERATION_MAX_RETRIES = 3
+IMAGE_GENERATION_RETRY_DELAY_BASE = 2.0  # seconds
+IMAGE_GENERATION_MAX_CONCURRENT = 5  # parallel requests limit
+
 # Mock data placeholders (for dry run mode)
 MOCK_WORLD_NAME = "Thornfield Manor"
 MOCK_VICTIM_NAME = "Lord Reginald Thornfield"
