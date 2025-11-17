@@ -55,9 +55,10 @@ export GOOGLE_API_KEY='your-api-key-here'
 uv run mystery-agents
 
 # With options
-uv run mystery-agents --dry-run     # Use mock data (fast testing)
-uv run mystery-agents --debug       # Enable debug logging
-uv run mystery-agents --no-images   # Skip character portrait generation (enabled by default)
+uv run mystery-agents --dry-run        # Use mock data (fast testing)
+uv run mystery-agents --debug          # Enable debug logging
+uv run mystery-agents --no-images      # Skip character portrait generation (enabled by default)
+uv run mystery-agents --keep-work-dir  # Keep intermediate files (markdown + images) for inspection
 
 # Using configuration file (skips wizard)
 uv run mystery-agents --config config.yaml
@@ -145,43 +146,49 @@ The system generates a complete game package in `/output/game_xxxxx/`:
 
 ```
 /output/game_xxxxx/
-├── README.txt                   # Instructions for using the game
-├── mystery_game_xxxxx.zip       # Complete ZIP package
+├── mystery_game_xxxxx.zip       # Complete ZIP package (PDFs only)
 │
-├── /host/                       # Host-only materials (⚠️ SPOILERS!)
-│   ├── host_guide.md            # Complete host guide
-│   ├── host_guide.pdf           # PDF version (ready to print)
-│   ├── solution.md              # Complete solution
-│   ├── audio_script.md          # Audio narration script
-│   └── clue_reference.md        # All clues with metadata
+├── /game/                       # Host materials (⚠️ SPOILERS!)
+│   ├── host_guide.pdf           # Complete host guide
+│   ├── solution.pdf             # Complete solution
+│   └── clue_reference.pdf       # All clues with metadata
 │
-├── /players/                    # Player packages (safe to share)
-│   ├── /player_1_Name/
-│   │   ├── invitation.txt       # Invitation with era/setting context
-│   │   ├── invitation.pdf       # PDF version
-│   │   ├── character_sheet.md   # Character details + Act 1 objectives
-│   │   └── character_sheet.pdf  # PDF version (with character portrait if generated)
+├── /characters/                 # All character sheets (flat structure)
+│   ├── Name_character_sheet.pdf        # Player character sheets (with AI portraits)
+│   ├── Name_invitation.pdf             # Player invitations
+│   ├── victim_character_sheet.pdf      # Host's victim role (Act 1)
+│   ├── detective_character_sheet.pdf   # Host's detective role (Act 2)
 │   └── ...
 │
-├── /clues/                      # Clean clues (no spoilers)
-│   ├── clue_1_xxx.md            # Markdown version
-│   ├── clue_1_xxx.pdf           # PDF version (ready to print)
-│   └── ...
-│
-└── /images/                     # Generated images (by default, skip with --no-images)
-    └── /characters/             # Character portrait images
-        ├── char_xxx_name.png    # AI-generated character portraits
-        └── ...
+└── /clues/                      # Clean clues for Act 2 (no spoilers)
+    ├── clue_01.pdf              # Numbered clues (ready to print)
+    ├── clue_02.pdf
+    └── ...
+```
+
+**Optimized for Printing:**
+The new flat structure makes it easy to print all files at once - no need to navigate through nested directories.
+
+**Optional Work Directory** (with `--keep-work-dir` flag):
+```
+/output/
+├── game_xxxxx/                  # Final package (PDFs only)
+└── _work_xxxxx/                 # Intermediate files (markdown + images)
+    ├── game/
+    ├── characters/
+    └── clues/
 ```
 
 **Key Features**:
-- ✅ **Dual Format**: Both Markdown and PDF for flexibility
-- ✅ **Clean PDFs**: No spoiler metadata in player-facing documents
+- ✅ **PDF-Only Package**: Final output contains only PDFs (easy to print, no clutter)
+- ✅ **Flat Structure**: All character sheets in one directory (no nested subdirectories)
+- ✅ **Clear Naming**: `Name_character_sheet.pdf`, `Name_invitation.pdf`, `clue_01.pdf`
+- ✅ **Host Character Sheets**: Dedicated sheets for victim and detective roles
+- ✅ **Embedded Images**: Character portraits embedded in PDFs (images removed from final package)
 - ✅ **Full Translation**: All content translated to selected language (English-first generation → translation)
-- ✅ **Markdown-to-PDF**: PDFs generated directly from markdown (single source of truth)
 - ✅ **Professional Styling**: Beautiful PDFs with CSS-based formatting via WeasyPrint
 - ✅ **Unicode Support**: Native Unicode support for all languages
-- ✅ **Print-Ready**: Professional PDFs ready to print directly
+- ✅ **Print-Ready**: Everything ready to print directly - just select the entire directory
 - ✅ **Context-Aware**: Era and location displayed on all materials for player immersion
 
 ## Development

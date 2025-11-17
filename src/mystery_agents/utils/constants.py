@@ -1,8 +1,8 @@
 """Constants used throughout the mystery agents system."""
 
 # File and directory names
-HOST_DIR = "host"
-PLAYERS_DIR = "players"
+HOST_DIR = "game"  # Renamed from "host" for clarity
+PLAYERS_DIR = "characters"  # Renamed from "players" and flattened
 CLUES_DIR = "clues"
 
 # File names
