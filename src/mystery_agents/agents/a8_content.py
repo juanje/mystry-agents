@@ -149,7 +149,6 @@ Return the response in the exact JSON format specified in the system prompt.
     def _mock_output(self, state: GameState) -> GameState:
         """Generate mock data for dry run mode."""
         from mystery_agents.models.state import (
-            AudioScript,
             ClueSolutionEntry,
             ClueSpec,
             DetectiveRole,

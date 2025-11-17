@@ -402,7 +402,15 @@ ZIP file: {zip_path}
 
 ## Your Role in Act 1: The Victim
 
-{hg.host_act1_role_description or "No victim role description provided."}
+**📄 See your dedicated Victim Character Sheet (victim_character_sheet.pdf) for complete details.**
+
+The victim character sheet includes:
+- Full character background and personality traits
+- Public persona and secrets
+- Costume suggestions
+- Character portrait (if images enabled)
+
+Quick summary: {hg.host_act1_role_description or "No victim role description provided."}
 
 ## Runtime Tips
 
@@ -418,21 +426,19 @@ ZIP file: {zip_path}
 
 {hg.act_2_intro_script or "No Act 2 intro script provided."}
 
-### Detective Role
+### Your Detective Role
 
-{hg.host_act2_detective_role.public_description if hg.host_act2_detective_role else "No detective role provided."}
+**📄 See your dedicated Detective Character Sheet (detective_character_sheet.pdf) for complete details.**
 
-### Clues to Reveal
+The detective character sheet includes:
+- Full character description and personality traits
+- Complete list of clues to reveal with interpretations
+- Guiding questions to ask players
+- Final solution script for the big reveal
+- Costume suggestions
+- Character portrait (if images enabled)
 
-{self._format_clues_list(hg.host_act2_detective_role) if hg.host_act2_detective_role else "No clues provided."}
-
-### Guiding Questions
-
-{self._format_guiding_questions(hg.host_act2_detective_role) if hg.host_act2_detective_role else "No questions provided."}
-
-### Final Solution Script
-
-{hg.host_act2_detective_role.final_solution_script if hg.host_act2_detective_role else "No solution script provided."}
+**Quick Tip**: Keep the detective character sheet handy during Act 2 for quick reference!
 """
 
         # Translate the entire file content if needed
@@ -441,20 +447,6 @@ ZIP file: {zip_path}
 
         path.write_text(content, encoding="utf-8")
 
-    def _format_clues_list(self, detective_role: Any) -> str:
-        """Format the clues list."""
-        if not detective_role.clues_to_reveal:
-            return "No clues to reveal."
-        return "\n".join(
-            f"- **Clue {clue.clue_id}**: {clue.how_to_interpret}"
-            for clue in detective_role.clues_to_reveal
-        )
-
-    def _format_guiding_questions(self, detective_role: Any) -> str:
-        """Format the guiding questions."""
-        if not detective_role.guiding_questions:
-            return "No guiding questions."
-        return "\n".join(f"- {question}" for question in detective_role.guiding_questions)
 
 
     def _write_solution(self, state: GameState, path: Path) -> None:
