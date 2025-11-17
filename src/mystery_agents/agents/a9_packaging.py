@@ -338,11 +338,15 @@ class PackagingAgent(BaseAgent):
         if pdf_tasks:
             self._generate_all_pdfs(pdf_tasks, max_workers=12)
 
-        # 8. Create README
+        # 8. Organize final package (PDFs only, move markdown + images to work dir if requested)
+        if not state.config.dry_run:
+            self._organize_final_package(game_dir, state.config.keep_work_dir, game_id, output_dir)
+
+        # 9. Create README
         readme_path = game_dir / README_FILENAME
         self._write_readme(state, readme_path, game_id)
 
-        # 9. Create ZIP archive (requires all PDFs to be ready)
+        # 10. Create ZIP archive (requires all PDFs to be ready)
         print(f"  Creating ZIP archive...")
         sys.stdout.flush()
         zip_path = Path(output_dir) / f"{ZIP_FILE_PREFIX}{game_id}.zip"
@@ -1011,6 +1015,56 @@ PRINTING RECOMMENDATIONS
 Enjoy your mystery party!
 """
         path.write_text(content, encoding="utf-8")
+
+    def _organize_final_package(
+        self, game_dir: Path, keep_work_dir: bool, game_id: str, output_dir: str
+    ) -> None:
+        """
+        Organize final package: keep only PDFs, move markdown and images to work dir or delete them.
+
+        Args:
+            game_dir: Game directory with all files
+            keep_work_dir: Whether to keep intermediate files in a work directory
+            game_id: Game ID for naming work directory
+            output_dir: Base output directory
+        """
+        import shutil
+
+        print(f"  Organizing final package (PDFs only)...")
+        sys.stdout.flush()
+
+        # Collect all markdown and image files
+        md_files = list(game_dir.rglob("*.md"))
+        png_files = list(game_dir.rglob("*.png"))
+        jpg_files = list(game_dir.rglob("*.jpg"))
+        all_files_to_move = md_files + png_files + jpg_files
+
+        if not all_files_to_move:
+            return
+
+        if keep_work_dir:
+            # Create work directory
+            work_dir = Path(output_dir) / f"_work_{game_id}"
+            work_dir.mkdir(exist_ok=True)
+
+            # Copy files to work directory, preserving structure
+            for file_path in all_files_to_move:
+                rel_path = file_path.relative_to(game_dir)
+                dest_path = work_dir / rel_path
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(file_path, dest_path)
+
+            print(f"  ✓ Moved {len(all_files_to_move)} intermediate files to {work_dir.name}/")
+            sys.stdout.flush()
+
+        # Delete markdown and image files from game_dir
+        for file_path in all_files_to_move:
+            file_path.unlink()
+
+        # Clean up empty directories
+        for dirpath in sorted(game_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+            if dirpath.is_dir() and not any(dirpath.iterdir()):
+                dirpath.rmdir()
 
     def _create_zip(self, source_dir: Path, output_path: Path) -> None:
         """Create a ZIP archive of the game directory."""

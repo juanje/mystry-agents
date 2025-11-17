@@ -51,6 +51,7 @@ class GameConfig(BaseModel):
     dry_run: bool = False
     debug_model: bool = False
     config_file: str | None = None  # Path to YAML config file (skips wizard if provided)
+    keep_work_dir: bool = False  # Keep intermediate markdown files for inspection
 
 
 # --- Mundo ---

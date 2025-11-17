@@ -48,8 +48,19 @@ from mystery_agents.utils.constants import (
     default=None,
     help="Load configuration from YAML file (skips interactive wizard)",
 )
+@click.option(
+    "--keep-work-dir",
+    is_flag=True,
+    default=False,
+    help="Keep intermediate working directory with markdown files for inspection",
+)
 def generate(
-    output_dir: Path, dry_run: bool, debug: bool, no_images: bool, config: Path | None
+    output_dir: Path,
+    dry_run: bool,
+    debug: bool,
+    no_images: bool,
+    config: Path | None,
+    keep_work_dir: bool,
 ) -> None:
     """
     Generate a mystery party game.
@@ -79,6 +90,7 @@ def generate(
             debug_model=debug,
             duration_minutes=90,
             config_file=str(config) if config else None,
+            keep_work_dir=keep_work_dir,
         ),
     )
 
