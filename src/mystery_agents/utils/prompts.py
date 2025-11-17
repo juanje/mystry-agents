@@ -484,7 +484,6 @@ Structure:
     - clue_1.md
     - clue_2.md
     ...
-  - README.txt
 ```
 
 Create FileDescriptors for all files and populate PackagingInfo.

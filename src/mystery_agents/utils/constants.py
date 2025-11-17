@@ -10,7 +10,6 @@ HOST_GUIDE_FILENAME = "host_guide.md"
 SOLUTION_FILENAME = "solution.md"
 INVITATION_FILENAME = "invitation.txt"
 CHARACTER_SHEET_FILENAME = "character_sheet.md"
-README_FILENAME = "README.txt"
 
 # File extensions
 MARKDOWN_EXT = ".md"
