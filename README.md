@@ -27,9 +27,19 @@ Mystery Agents is a multi-agent system that generates complete mystery party gam
 - Python 3.12 or higher
 - `uv` package manager ([installation guide](https://github.com/astral-sh/uv))
 - **WeasyPrint system dependencies** (for PDF generation):
-  - Ubuntu/Debian: `sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2`
-  - Fedora: `sudo dnf install pango gdk-pixbuf2 cairo`
-  - macOS: `brew install pango gdk-pixbuf cairo`
+  - Ubuntu/Debian:
+  ```console
+  $ sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2
+  ```
+  - Fedora:
+  ```console
+  $ sudo dnf install pango gdk-pixbuf2 cairo
+  ```
+  - macOS:
+  ```console
+  $ brew install pango gdk-pixbuf cairo
+  $ export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+  ```
   - Windows: Download GTK+ runtime from [gtk.org](https://www.gtk.org/)
 
 ### Setup
