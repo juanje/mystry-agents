@@ -437,13 +437,24 @@ You MUST return a JSON object with exactly three fields:
    - live_action_murder_event_guide: string
    - act_2_intro_script: string
    - host_act2_detective_role: DetectiveRole object with:
-     * character_name: string
+     * character_name: string (must match host gender and be culturally appropriate)
      * public_description: string
      * personality_traits: array of strings (e.g., ["analytical", "observant", "methodical"]) - MANDATORY
      * clues_to_reveal: array of ClueSolutionEntry objects
      * guiding_questions: array of strings
      * final_solution_script: string
      * costume_suggestion: string or null (costume idea for host when playing detective)
+
+     **CRITICAL**: The detective/investigator role MUST:
+     - Match the host's gender (if host is female, create a female investigator)
+     - Be appropriate for the epoch and culture (examples by era):
+       * Victorian: Private inquiry agent, amateur sleuth (like Miss Marple), consulting detective
+       * 1920s-30s: Private investigator, amateur detective, society lady investigator
+       * Modern: Police detective, private investigator, forensic expert, investigative journalist
+       * Other eras: Adapt accordingly (e.g., medieval: magistrate, ancient: philosopher-investigator)
+     - Have authority or credibility to investigate (legal, social, or intellectual authority)
+     - Fit naturally into the setting and culture
+     - Be a NEW character (not one of the existing suspects)
 
 2. "clues" - Array of ClueSpec objects, each with:
    - id: string (auto-generated, format "clue-xxxxx")

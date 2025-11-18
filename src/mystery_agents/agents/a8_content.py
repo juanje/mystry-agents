@@ -104,10 +104,12 @@ GAME INFO:
 - Tone: {GAME_TONE_STYLE}. {GAME_TONE_DESCRIPTION}
 - Duration: {state.config.duration_minutes} minutes
 - Players: {len(state.characters)}
+- Host gender: {state.config.host_gender}
 
 SETTING:
 - Location: {safe_get_world_location_name(state)}
 - Epoch: {safe_get_world_epoch(state)}
+- Country/Culture: {state.config.country}
 - Atmosphere: {safe_get_world_visual_keywords(state)}
 
 VICTIM (HOST'S ACT 1 ROLE):
