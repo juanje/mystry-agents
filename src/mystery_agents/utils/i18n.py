@@ -57,6 +57,15 @@ DOCUMENT_LABELS = {
         "no_truth_narrative": "No truth narrative provided.",
         "timeline_events": "Timeline of Events",
         "no_timeline": "No timeline provided.",
+        "murder_event_title": "MURDER EVENT",
+        "time": "Time",
+        "what_happened": "What Happened",
+        "characters_involved": "Characters Involved",
+        # Epochs
+        "epoch_modern": "Modern",
+        "epoch_1920s": "1920s",
+        "epoch_victorian": "Victorian",
+        "epoch_custom": "Custom",
         # Invitation
         "invitation_title": "Mystery Party Invitation",
         "you_are_invited": "You Are Invited!",
@@ -160,6 +169,15 @@ DOCUMENT_LABELS = {
         "no_truth_narrative": "No se proporcionó narrativa de la verdad.",
         "timeline_events": "Cronología de Eventos",
         "no_timeline": "No se proporcionó cronología.",
+        "murder_event_title": "EVENTO DEL ASESINATO",
+        "time": "Hora",
+        "what_happened": "Qué Sucedió",
+        "characters_involved": "Personajes Involucrados",
+        # Epochs
+        "epoch_modern": "Moderna",
+        "epoch_1920s": "Años 20",
+        "epoch_victorian": "Victoriana",
+        "epoch_custom": "Personalizada",
         # Invitation
         "invitation_title": "Invitación a Fiesta Misterio",
         "you_are_invited": "¡Estás Invitado!",
@@ -288,3 +306,89 @@ def get_language_name(language_code: str) -> str:
         LANG_CODE_SPANISH: "Spanish",
     }
     return names.get(language_code, language_code)
+
+
+def translate_epoch(epoch: str, language: str) -> str:
+    """
+    Translate standard epoch names to target language.
+
+    Args:
+        epoch: Epoch identifier (e.g., "modern", "1920s", "Victorian", "custom")
+        language: Target language code
+
+    Returns:
+        Translated epoch name
+    """
+    labels = get_document_labels(language)
+    epoch_lower = epoch.lower()
+
+    # Map epoch values to label keys
+    epoch_mapping = {
+        "modern": "epoch_modern",
+        "1920s": "epoch_1920s",
+        "victorian": "epoch_victorian",
+        "custom": "epoch_custom",
+    }
+
+    label_key = epoch_mapping.get(epoch_lower)
+    if label_key and label_key in labels:
+        return labels[label_key]
+
+    # Return original if no translation found
+    return epoch
+
+
+# Common room name translations (Spanish only for now)
+ROOM_TRANSLATIONS_ES = {
+    "study": "Estudio",
+    "library": "Biblioteca",
+    "dining_room": "Comedor",
+    "drawing_room": "Sala de estar",
+    "lounge": "Salón",
+    "bedroom": "Dormitorio",
+    "master_bedroom": "Dormitorio principal",
+    "kitchen": "Cocina",
+    "parlor": "Sala",
+    "ballroom": "Salón de baile",
+    "conservatory": "Invernadero",
+    "billiard_room": "Sala de billar",
+    "wine_cellar": "Bodega",
+    "gallery": "Galería",
+    "terrace": "Terraza",
+    "garden": "Jardín",
+    "veranda": "Veranda",
+    "office": "Oficina",
+    "deck": "Cubierta",
+    "cabin": "Camarote",
+    "suite": "Suite",
+    "captains_quarters": "Camarote del capitán",
+    "main_deck": "Cubierta principal",
+    "observation_deck": "Cubierta de observación",
+    "bar": "Bar",
+    "restaurant": "Restaurante",
+    "spa": "Spa",
+    "pool": "Piscina",
+    "gym": "Gimnasio",
+}
+
+
+def translate_room_name(room_id: str | None, language: str) -> str:
+    """
+    Translate room identifier to human-readable name in target language.
+
+    Args:
+        room_id: Room identifier (e.g., "study", "dining_room")
+        language: Target language code
+
+    Returns:
+        Translated room name or formatted original
+    """
+    if not room_id:
+        return get_document_labels(language)["unknown"]
+
+    # For Spanish, use translation dictionary
+    if language == LANG_CODE_SPANISH and room_id in ROOM_TRANSLATIONS_ES:
+        return ROOM_TRANSLATIONS_ES[room_id]
+
+    # For English or unknown rooms, format nicely: "captains_quarters" -> "Captains Quarters"
+    return room_id.replace("_", " ").title()

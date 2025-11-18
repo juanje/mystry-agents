@@ -133,6 +133,21 @@ def translate_content(state: GameState) -> GameState:
                 state.killer_selection.truth_narrative
             )
 
+    # Collect timeline event texts
+    if state.timeline_global and state.timeline_global.time_blocks:
+        for block_idx, block in enumerate(state.timeline_global.time_blocks):
+            for event_idx, event in enumerate(block.events):
+                texts_to_translate[f"timeline.block_{block_idx}.event_{event_idx}.description"] = (
+                    event.description
+                )
+        # Murder event if exists
+        if (
+            hasattr(state.timeline_global, "live_action_murder_event")
+            and state.timeline_global.live_action_murder_event
+        ):
+            murder_event = state.timeline_global.live_action_murder_event
+            texts_to_translate["timeline.murder_event.description"] = murder_event.description
+
     # Collect relationship texts
     if state.relationships:
         for idx, rel in enumerate(state.relationships):
@@ -177,7 +192,7 @@ def translate_content(state: GameState) -> GameState:
     # Translate in parallel with rate limiting
     text_items = list(texts_to_translate.items())
     all_translations = asyncio.run(
-        _translate_all_batches_async(text_items, llm, target_lang, batch_size=20, max_concurrent=3)
+        _translate_all_batches_async(text_items, llm, target_lang, batch_size=25, max_concurrent=4)
     )
 
     # Apply translations back to state
@@ -269,6 +284,23 @@ def translate_content(state: GameState) -> GameState:
             state.killer_selection.truth_narrative = all_translations[
                 "killer_selection.truth_narrative"
             ]
+
+    # Apply timeline event translations
+    if state.timeline_global and state.timeline_global.time_blocks:
+        for block_idx, block in enumerate(state.timeline_global.time_blocks):
+            for event_idx, event in enumerate(block.events):
+                key = f"timeline.block_{block_idx}.event_{event_idx}.description"
+                if key in all_translations:
+                    event.description = all_translations[key]
+        # Apply murder event translation
+        if (
+            hasattr(state.timeline_global, "live_action_murder_event")
+            and state.timeline_global.live_action_murder_event
+        ):
+            if "timeline.murder_event.description" in all_translations:
+                state.timeline_global.live_action_murder_event.description = all_translations[
+                    "timeline.murder_event.description"
+                ]
 
     # Apply relationship translations
     if state.relationships:

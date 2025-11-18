@@ -28,7 +28,12 @@ from mystery_agents.utils.constants import (
     TEXT_EXT,
     ZIP_FILE_PREFIX,
 )
-from mystery_agents.utils.i18n import get_clue_labels, get_document_labels
+from mystery_agents.utils.i18n import (
+    get_clue_labels,
+    get_document_labels,
+    translate_epoch,
+    translate_room_name,
+)
 from mystery_agents.utils.prompts import A9_SYSTEM_PROMPT
 from mystery_agents.utils.state_helpers import safe_get_world_location_name
 
@@ -78,6 +83,9 @@ class PackagingAgent(BaseAgent):
             Tuple of (era, location_detail)
         """
         era = state.world.epoch if state.world else "Unknown"
+        # Translate epoch to target language
+        era = translate_epoch(era, state.config.language)
+
         location = safe_get_world_location_name(state)
         country = state.config.country
         region = state.config.region or ""
@@ -452,14 +460,15 @@ ZIP file: {zip_path}
 
 ## {labels["timeline_events"]}
 
-{self._format_timeline(state.timeline_global) if state.timeline_global else labels["no_timeline"]}
+{self._format_timeline(state, labels) if state.timeline_global else labels["no_timeline"]}
 """
 
         path.write_text(content, encoding="utf-8")
 
-    def _format_timeline(self, timeline: Any) -> str:
+    def _format_timeline(self, state: GameState, labels: dict[str, str]) -> str:
         """Format the timeline with complete event details including the murder."""
-        if not timeline.time_blocks:
+        timeline = state.timeline_global
+        if not timeline or not timeline.time_blocks:
             return "No time blocks."
         result = []
         for block in timeline.time_blocks:
@@ -470,16 +479,22 @@ ZIP file: {zip_path}
         # Add the murder event if it exists
         if hasattr(timeline, "live_action_murder_event") and timeline.live_action_murder_event:
             murder_event = timeline.live_action_murder_event
-            result.append("\n### MURDER EVENT")
-            result.append(f"- **Time**: {murder_event.time_approx}")
-            result.append(f"- **Location**: {murder_event.room_id or 'Unknown'}")
-            result.append(f"- **What Happened**: {murder_event.description}")
+            result.append(f"\n### {labels['murder_event_title']}")
+            result.append(f"- **{labels['time']}**: {murder_event.time_approx}")
+            # Translate room name
+            room_name = translate_room_name(murder_event.room_id, state.config.language)
+            result.append(f"- **{labels['location']}**: {room_name}")
+            result.append(f"- **{labels['what_happened']}**: {murder_event.description}")
             if (
                 hasattr(murder_event, "character_ids_involved")
                 and murder_event.character_ids_involved
             ):
+                # Convert character IDs to names
+                character_names = self._replace_character_ids_with_names(
+                    state, murder_event.character_ids_involved
+                )
                 result.append(
-                    f"- **Characters Involved**: {', '.join(murder_event.character_ids_involved)}"
+                    f"- **{labels['characters_involved']}**: {', '.join(character_names)}"
                 )
 
         return "\n".join(result)
