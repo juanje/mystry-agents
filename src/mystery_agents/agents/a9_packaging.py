@@ -567,14 +567,48 @@ ZIP file: {zip_path}
         path.write_text(content, encoding="utf-8")
 
     def _write_character_sheet(self, state: GameState, character: Any, path: Path) -> None:
-        """Write a character sheet."""
+        """Write a character sheet with consistent formatting."""
         # Get translated labels
         labels = get_document_labels(state.config.language)
+        era, location_detail = self._get_game_context(state)
+        gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
 
-        # Get relationships for this character
-        relationships_section = ""
+        # Build character image section
+        image_section = ""
+        if character.image_path and Path(character.image_path).exists():
+            image_filename = Path(character.image_path).name
+            relative_image_path = Path("../images/characters") / image_filename
+            image_section = f"![{character.name}]({relative_image_path})\n\n"
+        else:
+            image_section = f"*{labels['no_image']}*\n\n"
+
+        # Build personality traits section
+        if character.personality_traits:
+            traits_content = "\n".join(f"- {trait}" for trait in character.personality_traits)
+        else:
+            traits_content = f"- {labels['no_traits']}"
+
+        # Build personal secrets section
+        if character.personal_secrets:
+            secrets_content = "\n".join(f"- {secret}" for secret in character.personal_secrets)
+        else:
+            secrets_content = f"- {labels['no_secrets']}"
+
+        # Build personal goals section
+        if character.personal_goals:
+            goals_content = "\n".join(f"- {goal}" for goal in character.personal_goals)
+        else:
+            goals_content = f"- {labels['no_goals']}"
+
+        # Build act1 objectives section
+        if character.act1_objectives:
+            objectives_content = "\n".join(f"- {obj}" for obj in character.act1_objectives)
+        else:
+            objectives_content = f"- {labels['no_objectives']}"
+
+        # Build relationships section
+        character_relationships = []
         if state.relationships:
-            character_relationships = []
             for rel in state.relationships:
                 if rel.from_character_id == character.id:
                     other_char = next(
@@ -595,75 +629,61 @@ ZIP file: {zip_path}
                             relationship_desc += f" [Tension level: {rel.tension_level}/3]"
                         character_relationships.append(relationship_desc)
 
-            if character_relationships:
-                relationships_section = f"""
-## {labels["relationships"]}
-{chr(10).join(f"- {rel}" for rel in character_relationships)}
-"""
-
-        personality_traits_section = ""
-        if character.personality_traits:
-            personality_traits_section = chr(10).join(
-                f"- {trait}" for trait in character.personality_traits
-            )
+        if character_relationships:
+            relationships_content = "\n".join(f"- {rel}" for rel in character_relationships)
         else:
-            personality_traits_section = f"- {labels['no_objectives']}"
+            relationships_content = f"- {labels['no_relationships']}"
 
-        era, location_detail = self._get_game_context(state)
-        gathering_reason = state.world.gathering_reason if state.world else "A special gathering"
-
-        # Add character image if available
-        image_section = ""
-        if character.image_path and Path(character.image_path).exists():
-            image_filename = Path(character.image_path).name
-            relative_image_path = Path("../images/characters") / image_filename
-            image_section = f"""
-![{character.name}]({relative_image_path})
-
-"""
-
+        # Build complete content with consistent structure
         content = f"""# {labels["character_sheet_title"]}: {character.name}
+
 {image_section}
-## {labels["era"]}: {era}
+**{labels["era"]}**: {era}
 **{labels["location"]}**: {location_detail}
 **{labels["gathering_reason"]}**: {gathering_reason}
 
 ## {labels["role"]}: {character.role}
 
 ## {labels["public_description"]}
+
 {character.public_description}
 
 ## {labels["personality_traits"]}
-{personality_traits_section}
+
+{traits_content}
 
 ## {labels["personal_secrets"]}
-{chr(10).join(f"- {secret}" for secret in character.personal_secrets) if character.personal_secrets else f"- {labels['no_objectives']}"}
+
+{secrets_content}
 
 ## {labels["personal_goals"]}
-{chr(10).join(f"- {goal}" for goal in character.personal_goals) if character.personal_goals else f"- {labels['no_objectives']}"}
+
+{goals_content}
 
 ## {labels["motive"]}
+
 {character.motive_for_crime if character.motive_for_crime else labels["no_motive"]}
 
 ## {labels["costume"]}
+
 {character.costume_suggestion or labels["no_costume"]}
 
 ## {labels["act1_objectives"]}
-{chr(10).join(f"- {obj}" for obj in character.act1_objectives) if character.act1_objectives else f"- {labels['no_objectives']}"}
+
+{objectives_content}
 
 ## {labels["relation_to_victim"]}
+
 {character.relation_to_victim}
-{relationships_section}
+
+## {labels["relationships"]}
+
+{relationships_content}
+
+---
 
 {labels["remember_secrets"]}
 """
-
-        # If no image, note that in the content
-        if not character.image_path or not Path(character.image_path).exists():
-            content = content.replace(
-                f"# {labels['character_sheet_title']}:",
-                f"# {labels['character_sheet_title']}:\n\n*{labels['no_image']}*\n\n#",
-            )
 
         path.write_text(content, encoding="utf-8")
 
