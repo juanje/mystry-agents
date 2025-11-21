@@ -276,7 +276,7 @@ class ConfigWizardAgent:
             next((d for n, _, d in difficulties if n == difficulty_choice), "medium"),
         )
 
-        # Create config (dry_run, debug_model, and generate_images come from CLI flags)
+        # Create config (dry_run, debug_model, generate_images, and keep_work_dir come from CLI flags)
         config = GameConfig(
             language=language,
             country=country,
@@ -292,6 +292,7 @@ class ConfigWizardAgent:
             generate_images=state.config.generate_images,
             dry_run=state.config.dry_run,
             debug_model=state.config.debug_model,
+            keep_work_dir=state.config.keep_work_dir,
         )
 
         # Update state
