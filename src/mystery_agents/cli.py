@@ -186,6 +186,24 @@ def generate(
         click.echo("   No game was generated.", err=True)
         sys.exit(130)
     except Exception as e:
+        # Check if it's an API key error (common with Google Gemini)
+        error_message = str(e).lower()
+        if "api key" in error_message or "api_key_invalid" in error_message:
+            click.echo("\n\n❌ API Key Error", err=True)
+            click.echo("=" * 60, err=True)
+            click.echo("\nThe Google Gemini API key is missing or invalid.", err=True)
+            click.echo("\nTo fix this, set your API key as an environment variable:", err=True)
+            click.echo("\n  export GOOGLE_API_KEY='your-api-key-here'", err=True)
+            click.echo("\nTo get an API key:", err=True)
+            click.echo("  1. Visit: https://aistudio.google.com/apikey", err=True)
+            click.echo("  2. Create a new API key", err=True)
+            click.echo("  3. Set it as an environment variable (see above)", err=True)
+            click.echo("\n💡 Tip: Use --dry-run flag to test without API calls:", err=True)
+            click.echo("  mystery-agents --dry-run", err=True)
+            click.echo("\n" + "=" * 60, err=True)
+            sys.exit(1)
+
+        # Generic error handling for other exceptions
         click.echo(f"\n\n❌ Error during generation: {e}", err=True)
         import traceback
 
