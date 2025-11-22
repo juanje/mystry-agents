@@ -89,9 +89,10 @@ def generate(
 
     Examples:
 
-        mystery-agents                  # Uses game.yml if it exists
-        mystery-agents my-game.yml      # Uses specific config file
-        mystery-agents --dry-run        # Test without API calls (uses game.yml)
+    \b
+    $ mystery-agents                      # Uses game.yml if it exists
+    $ mystery-agents my-game.yml          # Uses specific config file
+    $ mystery-agents --dry-run            # Test without API calls (uses game.yml)
     """
     # Validate mutually exclusive flags
     if quiet and verbose > 0:
