@@ -569,8 +569,8 @@ ZIP file: {zip_path}
 {labels["costume"]}: {character.costume_suggestion or labels["no_costume"]}
 
 {labels["event_details"]}:
-- {labels["location"]}: {safe_get_world_location_name(state)}
-- {labels["date_time"]}: {labels["tbd_host"]}
+- {labels["location"]}:
+- {labels["date_time"]}:
 
 {labels["see_you_there"]}
 """
@@ -613,9 +613,10 @@ ZIP file: {zip_path}
         else:
             goals_content = f"- {labels['no_goals']}"
 
-        # Build act1 objectives section
+        # Build act1 objectives section (as checklist for players to mark off)
         if character.act1_objectives:
-            objectives_content = "\n".join(f"- {obj}" for obj in character.act1_objectives)
+            # Use Unicode empty square with rounded corners (▢) as a simple, reliable checkbox
+            objectives_content = "\n".join(f"▢ {obj}" for obj in character.act1_objectives)
         else:
             objectives_content = f"- {labels['no_objectives']}"
 
@@ -632,7 +633,7 @@ ZIP file: {zip_path}
                             rel.type, state.config.language
                         )
                         relationship_desc = (
-                            f"{other_char.name} ({translated_rel_type}): {rel.description}"
+                            f"**{other_char.name}** ({translated_rel_type}): {rel.description}"
                         )
                         if rel.tension_level > 1:
                             relationship_desc += (
@@ -648,7 +649,7 @@ ZIP file: {zip_path}
                             rel.type, state.config.language
                         )
                         relationship_desc = (
-                            f"{other_char.name} ({translated_rel_type}): {rel.description}"
+                            f"**{other_char.name}** ({translated_rel_type}): {rel.description}"
                         )
                         if rel.tension_level > 1:
                             relationship_desc += (

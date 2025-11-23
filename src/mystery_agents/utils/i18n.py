@@ -87,7 +87,6 @@ class DocumentLabels(TypedDict, total=False):
     role: str
     event_details: str
     date_time: str
-    tbd_host: str
     see_you_there: str
     what_you_receive: str
     invitation: str

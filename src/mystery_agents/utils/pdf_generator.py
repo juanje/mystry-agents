@@ -85,7 +85,8 @@ def markdown_to_pdf(
             margin-bottom: 0.5em;
         }
         ul, ol {
-            margin-left: 1.5em;
+            margin-left: 0;
+            padding-left: 1em;
             margin-bottom: 0.5em;
         }
         li {
@@ -123,7 +124,8 @@ def markdown_to_pdf(
             text-align: right;
         }
         ul, ol {
-            margin-right: 1.5em;
+            margin-right: 0;
+            padding-right: 1em;
             margin-left: 0;
         }
         blockquote {
