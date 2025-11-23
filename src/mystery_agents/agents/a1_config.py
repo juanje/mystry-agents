@@ -75,6 +75,7 @@ class ConfigLoaderAgent:
             host_gender=data["host_gender"],
             duration_minutes=data.get("duration_minutes", 90),
             difficulty=data.get("difficulty", "medium"),
+            killer_knows_identity=data.get("killer_knows_identity", False),
             # CLI flags override YAML
             generate_images=state.config.generate_images,
             dry_run=state.config.dry_run,

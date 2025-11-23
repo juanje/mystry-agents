@@ -36,6 +36,16 @@ Your guests (between 4 and 10) are the heart of the mystery. Each one will recei
 
 One of them is the murderer. Mystery Agents creates a logical plot where several characters have a solid motive, but only one had the opportunity and means.
 
+**Does the Killer Know?**
+
+You can choose between two game modes:
+
+- **Killer doesn't know (default)**: No player knows if they're the murderer until the final reveal. This creates equal tension for everyone, as all players suspect themselves and each other equally. It's perfect for groups that prefer surprise and intrigue.
+
+- **Killer knows their identity**: The killer receives confidential instructions in their character sheet explaining what they did and how. This allows them to actively work to avoid detection, create false leads, and enjoy the psychological challenge of staying in character while hiding their guilt. It's ideal for players who enjoy strategic deception and roleplaying.
+
+Both modes work equally well — it's a matter of your group's preference and playstyle.
+
 ## The Game Flow, Step by Step
 
 Here's how a typical game night would unfold:

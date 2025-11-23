@@ -37,6 +37,7 @@ Mystery Agents generates **complete murder mystery party games** in the style of
 - 🎨 **AI-generated portraits** for each character (optional)
 - 🌍 **Cultural adaptation** - names and customs match your country/region
 - 🗣️ **Native language generation** - Spanish or English (more coming)
+- 🎭 **Flexible killer reveal** - optionally let the killer know their identity from the start
 
 **Perfect for:**
 - Game masters planning a mystery party
@@ -168,6 +169,7 @@ players:
 host_gender: male
 duration_minutes: 90      # 60-180
 difficulty: medium        # easy, medium, hard
+killer_knows_identity: false  # If true, killer knows they're the murderer
 ```
 
 ### Configuration Options

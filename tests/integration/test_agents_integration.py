@@ -261,3 +261,70 @@ def test_packaging(state_with_crime: GameState, tmp_path: Path) -> None:
         # Verify mocks were called (but no actual I/O happened)
         if state_with_content.host_guide:
             mock_write_host.assert_called_once()
+
+
+@pytest.mark.slow
+def test_killer_knows_identity_feature(basic_state: GameState) -> None:
+    """Test that killer_knows_identity flag works correctly."""
+    from mystery_agents.agents.a3_characters import CharactersAgent
+    from mystery_agents.agents.a8_content import ContentGenerationAgent
+
+    # Set up state with killer_knows_identity enabled
+    basic_state.config.killer_knows_identity = True
+
+    # Generate world
+    world_agent = WorldAgent()
+    state = world_agent.run(basic_state)
+
+    # Generate characters
+    char_agent = CharactersAgent()
+    state = char_agent.run(state)
+
+    # Generate crime
+    crime_agent = CrimeAgent()
+    state = crime_agent.run(state)
+
+    # Select killer
+    killer_agent = KillerSelectionAgent()
+    state = killer_agent.run(state)
+
+    # Generate content
+    content_agent = ContentGenerationAgent()
+    state = content_agent.run(state)
+
+    # Verify killer_brief_narrative is generated when killer_knows_identity is True
+    assert state.killer_brief_narrative is not None
+    assert len(state.killer_brief_narrative) > 0
+
+
+@pytest.mark.slow
+def test_killer_does_not_know_identity_by_default(basic_state: GameState) -> None:
+    """Test that killer_brief_narrative is None when killer_knows_identity is False."""
+    from mystery_agents.agents.a3_characters import CharactersAgent
+    from mystery_agents.agents.a8_content import ContentGenerationAgent
+
+    # killer_knows_identity defaults to False
+    assert basic_state.config.killer_knows_identity is False
+
+    # Generate world
+    world_agent = WorldAgent()
+    state = world_agent.run(basic_state)
+
+    # Generate characters
+    char_agent = CharactersAgent()
+    state = char_agent.run(state)
+
+    # Generate crime
+    crime_agent = CrimeAgent()
+    state = crime_agent.run(state)
+
+    # Select killer
+    killer_agent = KillerSelectionAgent()
+    state = killer_agent.run(state)
+
+    # Generate content
+    content_agent = ContentGenerationAgent()
+    state = content_agent.run(state)
+
+    # Verify killer_brief_narrative is None when killer_knows_identity is False
+    assert state.killer_brief_narrative is None

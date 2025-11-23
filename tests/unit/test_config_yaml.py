@@ -171,3 +171,52 @@ host_gender: male
     assert config.dry_run is True
     assert config.generate_images is True
     assert config.debug_model is True
+
+
+def test_load_from_yaml_with_killer_knows_identity(tmp_path: Path) -> None:
+    """Test loading YAML with killer_knows_identity set to true."""
+    yaml_content = """
+language: es
+country: Spain
+epoch: modern
+theme: family_mansion
+host_gender: male
+killer_knows_identity: true
+"""
+
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text(yaml_content)
+
+    agent = ConfigLoaderAgent()
+    state = GameState(
+        meta=MetaInfo(),
+        config=GameConfig(dry_run=True, duration_minutes=90),
+    )
+
+    config = agent._load_from_yaml(str(config_file), state)
+
+    assert config.killer_knows_identity is True
+
+
+def test_load_from_yaml_killer_knows_identity_defaults_to_false(tmp_path: Path) -> None:
+    """Test that killer_knows_identity defaults to False when not specified."""
+    yaml_content = """
+language: es
+country: Spain
+epoch: modern
+theme: family_mansion
+host_gender: male
+"""
+
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text(yaml_content)
+
+    agent = ConfigLoaderAgent()
+    state = GameState(
+        meta=MetaInfo(),
+        config=GameConfig(dry_run=True, duration_minutes=90),
+    )
+
+    config = agent._load_from_yaml(str(config_file), state)
+
+    assert config.killer_knows_identity is False

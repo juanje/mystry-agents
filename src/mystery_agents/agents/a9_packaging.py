@@ -659,6 +659,32 @@ ZIP file: {zip_path}
         else:
             relationships_content = f"- {labels['no_relationships']}"
 
+        # Build killer instructions section (if applicable)
+        killer_section = ""
+        if state.config.killer_knows_identity and state.killer_selection:
+            if character.id == state.killer_selection.killer_id and state.killer_brief_narrative:
+                killer_section = f"""
+---
+
+## {labels["killer_instructions"]}
+
+**{labels["killer_warning"]}**
+
+### {labels["what_you_did"]}
+
+{state.killer_brief_narrative}
+
+### {labels["your_mission"]}
+
+Tu objetivo es **evitar ser descubierto** durante la investigación:
+- Mantén la calma y actúa naturalmente
+- Utiliza tu coartada y tus secretos estratégicamente
+- Desvía las sospechas hacia otros personajes cuando sea posible
+- Recuerda: otros personajes también tienen motivos y secretos
+
+---
+"""
+
         # Build complete content with consistent structure
         content = f"""# {labels["character_sheet_title"]}: {character.name}
 
@@ -704,7 +730,7 @@ ZIP file: {zip_path}
 ## {labels["relationships"]}
 
 {relationships_content}
-
+{killer_section}
 ---
 
 {labels["remember_secrets"]}

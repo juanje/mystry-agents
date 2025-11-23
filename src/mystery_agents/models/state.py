@@ -47,6 +47,7 @@ class GameConfig(BaseModel):
     host_gender: Literal["male", "female"] = "male"
     duration_minutes: int = Field(90, ge=60, le=180)
     difficulty: DifficultyLevel = "medium"
+    killer_knows_identity: bool = False  # If True, killer's character sheet reveals their identity
     generate_images: bool = False
     dry_run: bool = False
     debug_model: bool = False
@@ -655,6 +656,9 @@ class GameState(BaseModel):
     maps: list[MapSpec] = []
 
     host_guide: HostGuide | None = None
+    killer_brief_narrative: str | None = (
+        None  # Brief narrative for killer if they know their identity
+    )
     visual_style: VisualStyle | None = None
 
     validation: ValidationReport | None = None

@@ -106,7 +106,11 @@
     "total_clues": "Total clues",
     "host_only_warning": "This document contains spoiler information about which clues incriminate/exonerate suspects. Do NOT share with players.",
     "players_get_clean": "Players will receive clean versions of the clues without the metadata.",
-    "no_image": "No character image available."
+    "no_image": "No character image available.",
+    "killer_instructions": "⚠️ CONFIDENTIAL INSTRUCTIONS - YOU ARE THE KILLER",
+    "killer_warning": "This information is FOR YOUR EYES ONLY. Do not share it with anyone else.",
+    "what_you_did": "What You Did",
+    "your_mission": "Your Mission During the Game"
   },
   "clue": {
     "clue": "Clue",

@@ -41,6 +41,10 @@ class A8Output(BaseModel):
     clues: list[ClueSpec] = Field(
         description="List of clues for Act 2 investigation. Should include at least one clue per character."
     )
+    killer_brief_narrative: str | None = Field(
+        default=None,
+        description="Brief narrative for the killer player if killer_knows_identity is true. Null otherwise.",
+    )
 
 
 class ContentGenerationAgent(BaseAgent):
@@ -123,6 +127,7 @@ CHARACTERS (SUSPECTS):
 
 KILLER:
 - {killer.name if killer else "Unknown"} (ID: {state.killer_selection.killer_id if state.killer_selection else "N/A"})
+- Killer knows identity: {state.config.killer_knows_identity}
 
 CRIME:
 - Method: {safe_get_crime_method_description(state)}
@@ -140,6 +145,10 @@ REQUIREMENTS:
 4. Character IDs in clues must match existing character IDs
 5. All string fields must have values - do not leave any empty
 6. Arrays can be empty [] if not applicable
+7. Create a "killer_brief_narrative" field:
+   - If killer_knows_identity is TRUE, generate a brief narrative for the killer (2-3 paragraphs)
+   - If killer_knows_identity is FALSE, set this field to null
+   - The brief narrative should be written in second person and help the killer play their role
 
 Return the response in the exact JSON format specified in the system prompt.
 """
@@ -150,6 +159,7 @@ Return the response in the exact JSON format specified in the system prompt.
         # Update state
         state.host_guide = result.host_guide
         state.clues = result.clues
+        state.killer_brief_narrative = result.killer_brief_narrative
 
         return state
 
@@ -214,5 +224,15 @@ Return the response in the exact JSON format specified in the system prompt.
                 is_red_herring=False,
             ),
         ]
+
+        # Mock killer_brief_narrative (if killer_knows_identity is true)
+        if state.config.killer_knows_identity:
+            state.killer_brief_narrative = (
+                "You are the killer. During Act 1, you poisoned the victim's brandy when no one was watching. "
+                "Your motive was related to the recent changes in the will. "
+                "Maintain your composure and use your alibi to deflect suspicion onto others."
+            )
+        else:
+            state.killer_brief_narrative = None
 
         return state

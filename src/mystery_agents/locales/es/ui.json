@@ -106,7 +106,11 @@
     "total_clues": "Total de pistas",
     "host_only_warning": "Este documento contiene información de spoilers sobre qué pistas incriminan/exoneran a los sospechosos. NO compartir con los jugadores.",
     "players_get_clean": "Los jugadores recibirán versiones limpias de las pistas sin los metadatos.",
-    "no_image": "No hay imagen del personaje disponible."
+    "no_image": "No hay imagen del personaje disponible.",
+    "killer_instructions": "⚠️ INSTRUCCIONES CONFIDENCIALES - ERES EL ASESINO",
+    "killer_warning": "Esta información es SOLO PARA TI. No la compartas con nadie más.",
+    "what_you_did": "Lo que hiciste",
+    "your_mission": "Tu misión durante el juego"
   },
   "clue": {
     "clue": "Pista",
