@@ -484,6 +484,22 @@ def get_language_name(language_code: str) -> str:
     return name if name else language_code
 
 
+def get_filename(filename_key: str, language: str) -> str:
+    """
+    Get the translated filename for a given key and language.
+
+    Args:
+        filename_key: The key for the filename (e.g., "characters_dir", "clues_dir")
+        language: Two-letter language code (e.g., "en", "es")
+
+    Returns:
+        Translated filename
+    """
+    tm = TranslationManager(language)
+    filename = tm._lookup(tm.translations, f"filenames.{filename_key}")
+    return filename if filename else filename_key
+
+
 def translate_epoch(epoch: str, language: str) -> str:
     """
     Translate standard epoch names to target language.

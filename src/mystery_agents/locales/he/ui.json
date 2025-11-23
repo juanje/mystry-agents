@@ -14,7 +14,7 @@
     "introduction": "הקדמה (להקריא לאורחים)",
     "setup_instructions": "הוראות הכנה",
     "your_role_act1": "תפקידך במערכה 1: הקורבן",
-    "see_victim_sheet": "📄 ראה את דף הדמות המיוחד שלך של הקורבן (victim_character_sheet.pdf) לפרטים המלאים.",
+    "see_victim_sheet": "📄 ראה את דף הדמות שלך של הקורבן לפרטים המלאים.",
     "victim_sheet_includes": "דף הדמות של הקורבן כולל:",
     "full_background": "רקע מלא של הדמות ותכונות אישיות",
     "public_persona": "דמות ציבורית וסודות",
@@ -29,7 +29,7 @@
     "intro_script": "תסריט הקדמה (להקריא לשחקנים)",
     "no_act2_intro": "לא סופק תסריט הקדמה למערכה 2.",
     "detective_role": "תפקידך כחוקר",
-    "see_detective_sheet": "📄 ראה את דף הדמות המיוחד שלך של החוקר (detective_character_sheet.pdf) לפרטים המלאים.",
+    "see_detective_sheet": "📄 ראה את דף הדמות שלך של החוקר לפרטים המלאים.",
     "detective_sheet_includes": "דף הדמות של החוקר כולל:",
     "character_description": "תיאור מלא של הדמות ותכונות אישיות",
     "clues_list": "רשימה מלאה של רמזים לחשיפה עם פרשנויות",
@@ -117,6 +117,7 @@
   },
   "clue": {
     "clue": "רמז",
+    "clue_singular": "רמז",
     "type": "סוג",
     "description": "תיאור",
     "related_info": "מידע קשור",
@@ -184,6 +185,18 @@
     "it": "איטלקית",
     "de": "גרמנית",
     "he": "עברית"
+  },
+  "filenames": {
+    "characters_dir": "damuiot",
+    "clues_dir": "rmazim",
+    "game_dir": "misxak",
+    "invitation": "hazmana",
+    "character_sheet": "daf_dmut",
+    "victim_character_sheet": "daf_dmut_korban",
+    "detective_character_sheet": "daf_dmut_xoker",
+    "host_guide": "madrikh_maarax",
+    "clue_reference": "hitiyaxsut_rmazim",
+    "solution": "pitron"
   },
   "country": {
     "Spain": "ספרד",

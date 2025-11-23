@@ -14,7 +14,7 @@
     "introduction": "Introduzione (Leggere agli Ospiti)",
     "setup_instructions": "Istruzioni di Preparazione",
     "your_role_act1": "Il Tuo Ruolo nell'Atto 1: La Vittima",
-    "see_victim_sheet": "📄 Vedi la tua scheda personaggio della vittima dedicata (victim_character_sheet.pdf) per i dettagli completi.",
+    "see_victim_sheet": "📄 Vedi la tua scheda personaggio della vittima per i dettagli completi.",
     "victim_sheet_includes": "La scheda personaggio della vittima include:",
     "full_background": "Background completo del personaggio e tratti della personalità",
     "public_persona": "Persona pubblica e segreti",
@@ -29,7 +29,7 @@
     "intro_script": "Script di Introduzione (Leggere ai Giocatori)",
     "no_act2_intro": "Nessuno script di introduzione dell'Atto 2 fornito.",
     "detective_role": "Il Tuo Ruolo di Detective",
-    "see_detective_sheet": "📄 Vedi la tua scheda personaggio del detective dedicata (detective_character_sheet.pdf) per i dettagli completi.",
+    "see_detective_sheet": "📄 Vedi la tua scheda personaggio del detective per i dettagli completi.",
     "detective_sheet_includes": "La scheda personaggio del detective include:",
     "character_description": "Descrizione completa del personaggio e tratti della personalità",
     "clues_list": "Elenco completo degli indizi da rivelare con interpretazioni",
@@ -117,6 +117,7 @@
   },
   "clue": {
     "clue": "Indizio",
+    "clue_singular": "Indizio",
     "type": "Tipo",
     "description": "Descrizione",
     "related_info": "Informazioni Correlate",
@@ -184,6 +185,18 @@
     "it": "Italiano",
     "de": "Tedesco",
     "he": "Ebraico"
+  },
+  "filenames": {
+    "characters_dir": "personaggi",
+    "clues_dir": "indizi",
+    "game_dir": "gioco",
+    "invitation": "invito",
+    "character_sheet": "scheda_personaggio",
+    "victim_character_sheet": "scheda_vittima",
+    "detective_character_sheet": "scheda_detective",
+    "host_guide": "guida_ospite",
+    "clue_reference": "riferimento_indizi",
+    "solution": "soluzione"
   },
   "country": {
     "Spain": "Spagna",

@@ -10,25 +10,21 @@ from typing import Any
 from mystery_agents.models.state import FileDescriptor, GameState, PackagingInfo
 from mystery_agents.utils.cache import LLMCache
 from mystery_agents.utils.constants import (
-    CLUES_DIR,
     DEFAULT_OUTPUT_DIR,
     GAME_DIR_PREFIX,
     GAME_ID_LENGTH,
     GAME_TONE_STYLE,
-    HOST_DIR,
-    HOST_GUIDE_FILENAME,
     JPG_EXT,
     MARKDOWN_EXT,
     PDF_EXT,
-    PLAYERS_DIR,
     PNG_EXT,
-    SOLUTION_FILENAME,
     TEXT_EXT,
     ZIP_FILE_PREFIX,
 )
 from mystery_agents.utils.i18n import (
     get_clue_labels,
     get_document_labels,
+    get_filename,
     translate_clue_type,
     translate_country_name,
     translate_epoch,
@@ -227,12 +223,16 @@ class PackagingAgent(BaseAgent):
             individual_player_packages=[],
         )
 
-        # Create all directories first
-        host_dir = game_dir / HOST_DIR
+        # Create all directories first (with translated names)
+        host_dir_name = get_filename("game_dir", state.config.language)
+        clues_dir_name = get_filename("clues_dir", state.config.language)
+        players_dir_name = get_filename("characters_dir", state.config.language)
+
+        host_dir = game_dir / host_dir_name
         host_dir.mkdir(exist_ok=True)
-        players_dir = game_dir / PLAYERS_DIR
+        players_dir = game_dir / players_dir_name
         players_dir.mkdir(exist_ok=True)
-        clues_dir = game_dir / CLUES_DIR
+        clues_dir = game_dir / clues_dir_name
         clues_dir.mkdir(exist_ok=True)
 
         # Collect all PDF generation tasks
@@ -240,49 +240,61 @@ class PackagingAgent(BaseAgent):
 
         # 1. Host guide (markdown + PDF task)
         if state.host_guide:
-            host_guide_md_path = host_dir / HOST_GUIDE_FILENAME
+            host_guide_filename = get_filename("host_guide", state.config.language)
+            host_guide_md_path = host_dir / f"{host_guide_filename}{MARKDOWN_EXT}"
             self._write_host_guide(state, host_guide_md_path)
             packaging.host_guide_file = FileDescriptor(
-                type="markdown", name=HOST_GUIDE_FILENAME, path=str(host_guide_md_path)
+                type="markdown",
+                name=f"{host_guide_filename}{MARKDOWN_EXT}",
+                path=str(host_guide_md_path),
             )
             packaging.host_package.append(packaging.host_guide_file)
 
-            host_guide_pdf_path = host_dir / f"host_guide{PDF_EXT}"
+            host_guide_pdf_path = host_dir / f"{host_guide_filename}{PDF_EXT}"
             pdf_tasks.append((host_guide_md_path, host_guide_pdf_path))
             packaging.host_package.append(
                 FileDescriptor(
-                    type="pdf", name=f"host_guide{PDF_EXT}", path=str(host_guide_pdf_path)
+                    type="pdf",
+                    name=f"{host_guide_filename}{PDF_EXT}",
+                    path=str(host_guide_pdf_path),
                 )
             )
 
         # 2. Victim character sheet - goes to /characters/ (markdown + PDF task)
         if state.crime and state.crime.victim:
-            victim_sheet_md_path = players_dir / f"victim_character_sheet{MARKDOWN_EXT}"
+            victim_sheet_filename = get_filename("victim_character_sheet", state.config.language)
+            victim_sheet_md_path = players_dir / f"{victim_sheet_filename}{MARKDOWN_EXT}"
             self._write_victim_sheet(state, victim_sheet_md_path)
 
-            victim_sheet_pdf_path = players_dir / f"victim_character_sheet{PDF_EXT}"
+            victim_sheet_pdf_path = players_dir / f"{victim_sheet_filename}{PDF_EXT}"
             pdf_tasks.append((victim_sheet_md_path, victim_sheet_pdf_path))
 
         # 2.6. Detective character sheet - goes to /characters/ (markdown + PDF task)
         if state.host_guide and state.host_guide.host_act2_detective_role:
-            detective_sheet_md_path = players_dir / f"detective_character_sheet{MARKDOWN_EXT}"
+            detective_sheet_filename = get_filename(
+                "detective_character_sheet", state.config.language
+            )
+            detective_sheet_md_path = players_dir / f"{detective_sheet_filename}{MARKDOWN_EXT}"
             self._write_detective_sheet(state, detective_sheet_md_path)
 
-            detective_sheet_pdf_path = players_dir / f"detective_character_sheet{PDF_EXT}"
+            detective_sheet_pdf_path = players_dir / f"{detective_sheet_filename}{PDF_EXT}"
             pdf_tasks.append((detective_sheet_md_path, detective_sheet_pdf_path))
 
         # 3. Solution (markdown + PDF task)
-        solution_path = host_dir / SOLUTION_FILENAME
+        solution_filename = get_filename("solution", state.config.language)
+        solution_path = host_dir / f"{solution_filename}{MARKDOWN_EXT}"
         self._write_solution(state, solution_path)
         solution_file = FileDescriptor(
-            type="markdown", name=SOLUTION_FILENAME, path=str(solution_path)
+            type="markdown", name=f"{solution_filename}{MARKDOWN_EXT}", path=str(solution_path)
         )
         packaging.host_package.append(solution_file)
 
-        solution_pdf_path = host_dir / f"solution{PDF_EXT}"
+        solution_pdf_path = host_dir / f"{solution_filename}{PDF_EXT}"
         pdf_tasks.append((solution_path, solution_pdf_path))
         packaging.host_package.append(
-            FileDescriptor(type="pdf", name=f"solution{PDF_EXT}", path=str(solution_pdf_path))
+            FileDescriptor(
+                type="pdf", name=f"{solution_filename}{PDF_EXT}", path=str(solution_pdf_path)
+            )
         )
 
         # 4. Player packages - flat structure (all files in /characters/)
@@ -290,17 +302,25 @@ class PackagingAgent(BaseAgent):
             char_name_clean = character.name.replace(" ", "_")
 
             # Invitation (markdown for PDF generation, will be removed later)
-            invitation_md_path = players_dir / f"{char_name_clean}_invitation{MARKDOWN_EXT}"
+            invitation_filename = get_filename("invitation", state.config.language)
+            invitation_md_path = (
+                players_dir / f"{char_name_clean}_{invitation_filename}{MARKDOWN_EXT}"
+            )
             self._write_invitation(state, character, invitation_md_path)
 
-            invitation_pdf_path = players_dir / f"{char_name_clean}_invitation{PDF_EXT}"
+            invitation_pdf_path = players_dir / f"{char_name_clean}_{invitation_filename}{PDF_EXT}"
             pdf_tasks.append((invitation_md_path, invitation_pdf_path))
 
             # Character sheet
-            char_sheet_md_path = players_dir / f"{char_name_clean}_character_sheet{MARKDOWN_EXT}"
+            character_sheet_filename = get_filename("character_sheet", state.config.language)
+            char_sheet_md_path = (
+                players_dir / f"{char_name_clean}_{character_sheet_filename}{MARKDOWN_EXT}"
+            )
             self._write_character_sheet(state, character, char_sheet_md_path)
 
-            char_sheet_pdf_path = players_dir / f"{char_name_clean}_character_sheet{PDF_EXT}"
+            char_sheet_pdf_path = (
+                players_dir / f"{char_name_clean}_{character_sheet_filename}{PDF_EXT}"
+            )
             pdf_tasks.append((char_sheet_md_path, char_sheet_pdf_path))
 
             player_package = FileDescriptor(
@@ -310,28 +330,34 @@ class PackagingAgent(BaseAgent):
             )
             packaging.individual_player_packages.append(player_package)
 
-        # 5. Clues - simplified naming (clue_01.pdf, clue_02.pdf, ...)
+        # 5. Clues - simplified naming with translated word (pista_01.pdf, indizio_01.pdf, ...)
+        clue_labels = get_clue_labels(state.config.language)
+        clue_word = clue_labels["clue_singular"].lower().replace(" ", "_")
+
         for idx, clue in enumerate(state.clues, 1):
             clue_num = f"{idx:02d}"  # Zero-padded 2 digits
-            clue_md_path = clues_dir / f"clue_{clue_num}{MARKDOWN_EXT}"
-            self._write_clue_clean(state, clue, clue_md_path)
+            clue_md_path = clues_dir / f"{clue_word}_{clue_num}{MARKDOWN_EXT}"
+            self._write_clue_clean(state, clue, clue_md_path, idx)
 
-            clue_pdf_path = clues_dir / f"clue_{clue_num}{PDF_EXT}"
+            clue_pdf_path = clues_dir / f"{clue_word}_{clue_num}{PDF_EXT}"
             pdf_tasks.append((clue_md_path, clue_pdf_path))
 
         # 6. Clue reference for host (markdown + PDF task)
-        clue_ref_path = host_dir / f"clue_reference{MARKDOWN_EXT}"
+        clue_ref_filename = get_filename("clue_reference", state.config.language)
+        clue_ref_path = host_dir / f"{clue_ref_filename}{MARKDOWN_EXT}"
         self._write_clue_reference(state, clue_ref_path)
         packaging.host_package.append(
             FileDescriptor(
-                type="markdown", name=f"clue_reference{MARKDOWN_EXT}", path=str(clue_ref_path)
+                type="markdown", name=f"{clue_ref_filename}{MARKDOWN_EXT}", path=str(clue_ref_path)
             )
         )
 
-        clue_ref_pdf_path = host_dir / f"clue_reference{PDF_EXT}"
+        clue_ref_pdf_path = host_dir / f"{clue_ref_filename}{PDF_EXT}"
         pdf_tasks.append((clue_ref_path, clue_ref_pdf_path))
         packaging.host_package.append(
-            FileDescriptor(type="pdf", name=f"clue_reference{PDF_EXT}", path=str(clue_ref_pdf_path))
+            FileDescriptor(
+                type="pdf", name=f"{clue_ref_filename}{PDF_EXT}", path=str(clue_ref_pdf_path)
+            )
         )
 
         log.info(f"  ✓ Wrote {len(state.characters) + len(state.clues) + 4} markdown files")
@@ -467,7 +493,7 @@ ZIP file: {zip_path}
 
 ## {labels["the_killer"]}
 
-**{killer.name if killer else labels["unknown"]}** (ID: {state.killer_selection.killer_id if state.killer_selection else "N/A"})
+**{killer.name if killer else labels["unknown"]}**
 
 ## {labels["rationale"]}
 
@@ -819,9 +845,15 @@ Tu objetivo es **evitar ser descubierto** durante la investigación:
 
         # Get translated labels
         labels = get_document_labels(state.config.language)
+        clue_labels = get_clue_labels(state.config.language)
 
         detective = state.host_guide.host_act2_detective_role
         era, location_detail = self._get_game_context(state)
+
+        # Create mapping from clue_id to clue number
+        clue_id_to_number = {}
+        for idx, clue in enumerate(state.clues, 1):
+            clue_id_to_number[clue.id] = idx
 
         # Add detective image if available
         image_section = ""
@@ -863,7 +895,7 @@ Tu objetivo es **evitar ser descubierto** durante la investigación:
 
 ## {labels["clues_to_reveal"]}
 
-{chr(10).join(f"**{entry.clue_id}**: {entry.how_to_interpret}" for entry in detective.clues_to_reveal) if detective.clues_to_reveal else f"- {labels['no_objectives']}"}
+{chr(10).join(f"**{clue_labels['clue_singular']} {clue_id_to_number.get(entry.clue_id, '?')}**: {entry.how_to_interpret}" for entry in detective.clues_to_reveal) if detective.clues_to_reveal else f"- {labels['no_objectives']}"}
 
 ## {labels["accusation_round"]}
 
@@ -884,14 +916,17 @@ Tu objetivo es **evitar ser descubierto** durante la investigación:
 
         path.write_text(content, encoding="utf-8")
 
-    def _write_clue_clean(self, state: GameState, clue: Any, path: Path) -> None:
+    def _write_clue_clean(self, state: GameState, clue: Any, path: Path, clue_number: int) -> None:
         """
         Write a clean clue for players (without spoiler metadata).
 
         This version only includes the clue title and description,
         without any information about who it incriminates/exonerates.
         """
-        content = f"""# {clue.title}
+        clue_labels = get_clue_labels(state.config.language)
+        clue_header = f"{clue_labels['clue_singular']} {clue_number}"
+
+        content = f"""# {clue_header}: {clue.title}
 
 {clue.description}
 """

@@ -14,7 +14,7 @@
     "introduction": "Introducción (leer a los invitados)",
     "setup_instructions": "Instrucciones de preparación",
     "your_role_act1": "Tu rol en el acto 1: la víctima",
-    "see_victim_sheet": "📄 Ver tu hoja de personaje de la víctima dedicada (victim_character_sheet.pdf) para detalles completos.",
+    "see_victim_sheet": "📄 Ver tu hoja de personaje de la víctima para detalles completos.",
     "victim_sheet_includes": "La hoja del personaje de la víctima incluye:",
     "full_background": "Trasfondo completo del personaje y rasgos de personalidad",
     "public_persona": "Personalidad pública y secretos",
@@ -29,7 +29,7 @@
     "intro_script": "Guión de introducción (leer a los jugadores)",
     "no_act2_intro": "No se proporcionó guión de introducción del acto 2.",
     "detective_role": "Tu rol como detective",
-    "see_detective_sheet": "📄 Ver tu hoja de personaje del detective dedicada (detective_character_sheet.pdf) para detalles completos.",
+    "see_detective_sheet": "📄 Ver tu hoja de personaje del detective para detalles completos.",
     "detective_sheet_includes": "La hoja del personaje del detective incluye:",
     "character_description": "Descripción completa del personaje y rasgos de personalidad",
     "clues_list": "Lista completa de pistas para revelar con interpretaciones",
@@ -117,6 +117,7 @@
   },
   "clue": {
     "clue": "Pista",
+    "clue_singular": "Pista",
     "type": "Tipo",
     "description": "Descripción",
     "related_info": "Información relacionada",
@@ -184,6 +185,18 @@
     "it": "Italiano",
     "de": "Alemán",
     "he": "Hebreo"
+  },
+  "filenames": {
+    "characters_dir": "personajes",
+    "clues_dir": "pistas",
+    "game_dir": "juego",
+    "invitation": "invitacion",
+    "character_sheet": "ficha_de_personaje",
+    "victim_character_sheet": "ficha_de_la_victima",
+    "detective_character_sheet": "ficha_del_detective",
+    "host_guide": "guia_del_anfitrion",
+    "clue_reference": "referencia_de_pistas",
+    "solution": "solucion"
   },
   "country": {
     "Spain": "España",

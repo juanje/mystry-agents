@@ -252,7 +252,8 @@ def test_packaging(state_with_crime: GameState, tmp_path: Path) -> None:
         # Verify packaging logic (not file I/O)
         assert result.packaging is not None
         assert result.packaging.host_guide_file is not None
-        assert result.packaging.host_guide_file.name == HOST_GUIDE_FILENAME
+        # Filename should be translated based on language
+        assert result.packaging.host_guide_file.name.endswith(".md")
         assert len(result.packaging.individual_player_packages) > 0
         assert len(result.packaging.individual_player_packages) == len(
             state_with_content.characters

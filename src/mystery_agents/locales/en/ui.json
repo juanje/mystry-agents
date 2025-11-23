@@ -14,7 +14,7 @@
     "introduction": "Introduction (Read to Guests)",
     "setup_instructions": "Setup Instructions",
     "your_role_act1": "Your Role in Act 1: The Victim",
-    "see_victim_sheet": "📄 See your dedicated Victim Character Sheet (victim_character_sheet.pdf) for complete details.",
+    "see_victim_sheet": "📄 See your dedicated Victim Character Sheet for complete details.",
     "victim_sheet_includes": "The victim character sheet includes:",
     "full_background": "Full character background and personality traits",
     "public_persona": "Public persona and secrets",
@@ -29,7 +29,7 @@
     "intro_script": "Introduction Script (Read to Players)",
     "no_act2_intro": "No Act 2 intro script provided.",
     "detective_role": "Your Detective Role",
-    "see_detective_sheet": "📄 See your dedicated Detective Character Sheet (detective_character_sheet.pdf) for complete details.",
+    "see_detective_sheet": "📄 See your dedicated Detective Character Sheet for complete details.",
     "detective_sheet_includes": "The detective character sheet includes:",
     "character_description": "Full character description and personality traits",
     "clues_list": "Complete list of clues to reveal with interpretations",
@@ -117,6 +117,7 @@
   },
   "clue": {
     "clue": "Clue",
+    "clue_singular": "Clue",
     "type": "Type",
     "description": "Description",
     "related_info": "Related Information",
@@ -184,6 +185,18 @@
     "it": "Italian",
     "de": "German",
     "he": "Hebrew"
+  },
+  "filenames": {
+    "characters_dir": "characters",
+    "clues_dir": "clues",
+    "game_dir": "game",
+    "invitation": "invitation",
+    "character_sheet": "character_sheet",
+    "victim_character_sheet": "victim_character_sheet",
+    "detective_character_sheet": "detective_character_sheet",
+    "host_guide": "host_guide",
+    "clue_reference": "clue_reference",
+    "solution": "solution"
   },
   "country": {
     "Spain": "Spain",

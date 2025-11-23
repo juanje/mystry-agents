@@ -14,7 +14,7 @@
     "introduction": "Einführung (Gästen Vorlesen)",
     "setup_instructions": "Vorbereitungsanweisungen",
     "your_role_act1": "Ihre Rolle in Akt 1: Das Opfer",
-    "see_victim_sheet": "📄 Siehe Ihren eigenen Charakterbogen des Opfers (victim_character_sheet.pdf) für vollständige Details.",
+    "see_victim_sheet": "📄 Siehe Ihren Charakterbogen des Opfers für vollständige Details.",
     "victim_sheet_includes": "Der Charakterbogen des Opfers enthält:",
     "full_background": "Vollständiger Charakterhintergrund und Persönlichkeitsmerkmale",
     "public_persona": "Öffentliche Person und Geheimnisse",
@@ -29,7 +29,7 @@
     "intro_script": "Einführungsskript (Spielern Vorlesen)",
     "no_act2_intro": "Kein Einführungsskript für Akt 2 bereitgestellt.",
     "detective_role": "Ihre Detektiv-Rolle",
-    "see_detective_sheet": "📄 Siehe Ihren eigenen Charakterbogen des Detektivs (detective_character_sheet.pdf) für vollständige Details.",
+    "see_detective_sheet": "📄 Siehe Ihren Charakterbogen des Detektivs für vollständige Details.",
     "detective_sheet_includes": "Der Charakterbogen des Detektivs enthält:",
     "character_description": "Vollständige Charakterbeschreibung und Persönlichkeitsmerkmale",
     "clues_list": "Vollständige Liste der Hinweise mit Interpretationen",
@@ -117,6 +117,7 @@
   },
   "clue": {
     "clue": "Hinweis",
+    "clue_singular": "Hinweis",
     "type": "Typ",
     "description": "Beschreibung",
     "related_info": "Verwandte Informationen",
@@ -184,6 +185,18 @@
     "it": "Italienisch",
     "de": "Deutsch",
     "he": "Hebräisch"
+  },
+  "filenames": {
+    "characters_dir": "charaktere",
+    "clues_dir": "hinweise",
+    "game_dir": "spiel",
+    "invitation": "einladung",
+    "character_sheet": "charakterbogen",
+    "victim_character_sheet": "opfer_charakterbogen",
+    "detective_character_sheet": "detektiv_charakterbogen",
+    "host_guide": "gastgeber_leitfaden",
+    "clue_reference": "hinweis_referenz",
+    "solution": "loesung"
   },
   "country": {
     "Spain": "Spanien",
