@@ -441,6 +441,14 @@ ZIP file: {zip_path}
 - {labels["character_portrait"]}
 
 **{labels["quick_tip"]}**: {labels["keep_sheet_handy"]}
+
+### {labels["accusation_round"]}
+
+{labels["accusation_round_desc"]}
+
+### {labels["dramatic_reveal"]}
+
+{labels["dramatic_reveal_desc"]}
 """
 
         path.write_text(content, encoding="utf-8")
@@ -856,6 +864,14 @@ Tu objetivo es **evitar ser descubierto** durante la investigación:
 ## {labels["clues_to_reveal"]}
 
 {chr(10).join(f"**{entry.clue_id}**: {entry.how_to_interpret}" for entry in detective.clues_to_reveal) if detective.clues_to_reveal else f"- {labels['no_objectives']}"}
+
+## {labels["accusation_round"]}
+
+{labels["accusation_round_desc"]}
+
+## {labels["dramatic_reveal"]}
+
+{labels["dramatic_reveal_desc"]}
 
 ## {labels["final_solution"]}
 

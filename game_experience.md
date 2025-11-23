@@ -66,9 +66,13 @@ At the climactic moment (your guide will tell you when), you follow the instruct
 
 You take a brief pause and read the **Act 2 Introduction Script**. You make your triumphant entrance as the Detective! The atmosphere changes. Your new Detective sheet guides you. "I found this letter in the victim's pocket," you say, handing out Clue 1. You begin interrogating the suspects, using your "guiding questions" if necessary.
 
-### 5. The Grand Reveal
+### 5. The Accusation Round
 
-Once all players have made their final accusation, you take the floor as the Detective. You read the complete solution explaining who the murderer was, how they did it, and why, connecting all the clues your guests discovered.
+When the investigation has concluded, call for an accusation round. Each player, one by one, states who they believe the killer is and why. This creates dramatic tension and allows everyone to share their deductions before the truth is revealed.
+
+### 6. The Grand Reveal
+
+After all players have made their accusations, you take the floor as the Detective. Like Hercule Poirot or Miss Marple, present each suspect's motive and opportunity first, building suspense. Then, you reveal the complete solution explaining who the murderer was, how they did it, and why, connecting all the clues your guests discovered.
 
 ## What Makes This Experience Unique?
 
