@@ -21,7 +21,6 @@ from mystery_agents.models.state import (
     WorldBible,
 )
 from mystery_agents.utils.constants import (
-    HOST_GUIDE_FILENAME,
     TEST_DEFAULT_DURATION,
     TEST_DEFAULT_PLAYERS,
 )
